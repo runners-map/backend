@@ -1,10 +1,10 @@
-package com.project.service_runners_map;
+package com.service.runnersmap;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ServiceRunnersMapApplicationTests {
+class RunnersmapApplicationTests {
 
 	@Test
 	void contextLoads() {

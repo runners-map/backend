@@ -1,13 +1,13 @@
-package com.project.service_runners_map;
+package com.service.runnersmap;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServiceRunnersMapApplication {
+public class RunnersmapApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ServiceRunnersMapApplication.class, args);
+		SpringApplication.run(RunnersmapApplication.class, args);
 	}
 
 }
