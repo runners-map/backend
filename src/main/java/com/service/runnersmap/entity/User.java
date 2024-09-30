@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +23,9 @@ public class User extends BaseTimeEntity{
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "users_id")
   private Long id;
+
+  @Column(name = "users_uuid", columnDefinition = "BINARY(16)", unique = true)
+  private UUID userId;
 
   @Column(name = "nickname", nullable = false)
   private String nickname;
