@@ -1,4 +1,4 @@
-package entity;
+package com.service.runnersmap.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
