@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User extends BaseTimeEntity{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +26,6 @@ public class User extends BaseTimeEntity{
 
   @Column(name = "users_uuid", columnDefinition = "BINARY(16)", unique = true)
   private UUID userId;
-
-  @Column(name = "nickname", nullable = false)
-  private String nickname;
-
-  @Column(name = "gender", nullable = false)
-  private String gender;
-
-  @Column(name = "email", unique = true, nullable = false)
-  private String email;
 
   @Column(name = "provider", nullable = false)
   private String provider;
