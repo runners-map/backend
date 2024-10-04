@@ -1,4 +1,4 @@
-package com.service.runnersmap.token.response;
+package com.service.runnersmap.token.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
