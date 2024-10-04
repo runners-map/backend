@@ -1,9 +1,9 @@
 package com.service.runnersmap.auth.handler;
 
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.service.runnersmap.auth.dto.GoogleUserInfo;
 import com.service.runnersmap.auth.dto.KakaoUserInfo;
 import com.service.runnersmap.auth.dto.OAuthUserInfo;
+import com.service.runnersmap.token.RefreshToken;
 import com.service.runnersmap.token.repository.RefreshTokenRepository;
 import com.service.runnersmap.user.User;
 import com.service.runnersmap.user.repository.UserRepository;

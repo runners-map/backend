@@ -2,7 +2,7 @@ package com.service.runnersmap.token.api;
 
 import com.service.runnersmap.common.ApiResponse;
 import com.service.runnersmap.common.constant.SuccessStatus;
-import com.service.runnersmap.token.dto.TokenDto.TokenResponse;
+import com.service.runnersmap.token.dto.TokenResponse;
 import com.service.runnersmap.token.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TokenController {
   private final TokenService authService;
 
+  // 액세스 토큰을 재발행하는 API
   @GetMapping("/reissue/access-token")
   public ResponseEntity<ApiResponse<Object>> reissueAccessToken(
       @RequestHeader("Authorization") String authorizationHeader) {
