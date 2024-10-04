@@ -29,7 +29,7 @@ public class ChatController {
   // 특정 채팅방에 들어가야 하니 {chatRoomID} 같은 게 더 필요하겠죠..?
   @MessageMapping(value = "/enter")
   public void enter(ChatMessageDto message) {
-    message.setMessage(message.getSender() + "님이 채팅방에 참여하였습니다.");
+    message.setMessage(message.getSenderId() + "님이 채팅방에 참여하였습니다.");
     template.convertAndSend("/sub/chat/room/" + message.getChatRoomId(), message);
   }
 
@@ -58,7 +58,7 @@ public class ChatController {
     List<ChatMessageDto> messageDTOs = messages.stream()
         .map(message -> ChatMessageDto.builder()
             .chatRoomId(chatRoomId)
-            .sender(message.getSender())
+            .senderId(message.getSender().getId())
             .message(message.getMessage())
             .sentAt(message.getSentAt())
             .build())
