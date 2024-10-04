@@ -25,6 +25,6 @@ public class ChatRoom {
 
   private String roomName;  // 들어가야 할까요? 모집글이랑 이으면 될까요?
 
-  @OneToMany(mappedBy = "chat_room")
+  @OneToMany(mappedBy = "chatRoom")
   private List<UserChatRoom> userChatRooms;
 }

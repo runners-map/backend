@@ -25,7 +25,7 @@ public class User {
 
   private String username;
 
-  @OneToMany(mappedBy = "users")
+  @OneToMany(mappedBy = "user")
   private List<UserChatRoom> userChatRooms;
 
 }

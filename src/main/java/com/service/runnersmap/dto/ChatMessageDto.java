@@ -1,5 +1,6 @@
 package com.service.runnersmap.dto;
 
+import com.service.runnersmap.entity.User;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import lombok.Setter;
 public class ChatMessageDto {
 
   private Long chatRoomId;
-  private String sender;
+  private User sender;
   private String message;
   private LocalDateTime sentAt; // 메시지 전송시간
 

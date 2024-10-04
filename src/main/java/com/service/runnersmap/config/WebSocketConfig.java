@@ -18,7 +18,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws/chat")  // 클라이언트가 WebSocket 연결을 위해 사용할 STOMP 엔드포인트(URL)
-        .setAllowedOriginPatterns("*")  // 일단은 모든 출처에서 연결 허용 (추후 수정 해야 할 듯)
+        .setAllowedOriginPatterns(
+            "http://localhost:8080") // localhost:8080만 허용  // 일단은 모든 출처에서 연결 허용 (추후 수정 해야 할 듯)
         .withSockJS();
 
     log.info("STOMP 엔드포인트 : /ws/chat");
