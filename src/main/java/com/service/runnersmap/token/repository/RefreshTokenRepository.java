@@ -1,6 +1,6 @@
 package com.service.runnersmap.token.repository;
 
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.service.runnersmap.token.RefreshToken;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
