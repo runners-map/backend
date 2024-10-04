@@ -29,8 +29,7 @@ public class ChatController {
   // 특정 채팅방에 들어가야 하니 {chatRoomID} 같은 게 더 필요하겠죠..?
   @MessageMapping(value = "/enter")
   public void enter(ChatMessageDto message) {
-    message.setMessage(message.getSenderId() + "님이 채팅방에 참여하였습니다.");
-    template.convertAndSend("/sub/chat/room/" + message.getChatRoomId(), message);
+    chatService.handleUserEnter(message);
   }
 
   // 메시지 전송
@@ -38,8 +37,6 @@ public class ChatController {
   public void sendMessage(ChatMessageDto message) {
      try {
        chatService.saveMessage(message);
-       // 클라이언트에세 메시지 전송
-       template.convertAndSend("/sub/chat/room/" + message.getChatRoomId(), message);
      } catch (RuntimeException e) {
        log.error("메시지 전송 중 오류 발생 : {} ", e.getMessage());
      }
@@ -50,20 +47,10 @@ public class ChatController {
   @GetMapping("/messages/{chatRoomId}")
   public ResponseEntity<List<ChatMessageDto>> getMessages(@PathVariable Long chatRoomId) {
 
-    List<ChatMessage> messages = chatService.getMessages(chatRoomId);
-    if (messages.isEmpty()) {
+    List<ChatMessageDto> messageDtos = chatService.getMessages(chatRoomId);
+    if (messageDtos.isEmpty()) {
       return ResponseEntity.notFound().build(); // 메시지가 없는 경우 404 반환
     }
-
-    List<ChatMessageDto> messageDTOs = messages.stream()
-        .map(message -> ChatMessageDto.builder()
-            .chatRoomId(chatRoomId)
-            .senderId(message.getSender().getId())
-            .message(message.getMessage())
-            .sentAt(message.getSentAt())
-            .build())
-        .collect(Collectors.toList());
-
-    return ResponseEntity.ok(messageDTOs); // 메시지 반환
+    return ResponseEntity.ok(messageDtos); // 메시지 반환
   }
 }

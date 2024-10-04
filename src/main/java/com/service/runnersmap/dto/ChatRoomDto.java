@@ -8,7 +8,6 @@ import lombok.Setter;
 import org.springframework.web.socket.WebSocketSession;
 
 @Getter
-@Setter
 public class ChatRoomDto {
 
   private String roomId;
