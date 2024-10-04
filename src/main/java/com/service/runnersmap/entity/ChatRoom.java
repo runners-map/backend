@@ -23,8 +23,8 @@ public class ChatRoom {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String roomName;
+  private String roomName;  // 들어가야 할까요? 모집글이랑 이으면 될까요?
 
-  @OneToMany(mappedBy = "chatRoom")
+  @OneToMany(mappedBy = "chat_room")
   private List<UserChatRoom> userChatRooms;
 }

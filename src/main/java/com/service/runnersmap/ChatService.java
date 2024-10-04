@@ -4,6 +4,7 @@ import com.service.runnersmap.dto.ChatMessageDto;
 import com.service.runnersmap.entity.ChatMessage;
 import com.service.runnersmap.entity.ChatRoom;
 import com.service.runnersmap.repository.ChatMessageRepository;
+import com.service.runnersmap.repository.ChatRoomRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -13,17 +14,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChatService {
 
-  private final ChatMessageRepository chatMessageRepository;;
+  private final ChatMessageRepository chatMessageRepository;
+  private final ChatRoomRepository chatRoomRepository;
 
   // 메시지 저장
   public void saveMessage(ChatMessageDto chatMessageDTO) {
+
+    // 채팅방 조회
+    ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDTO.getChatRoomId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방입니다."));
+
     ChatMessage message = new ChatMessage();
+
+    // 로그인 한 상태면 작성하지 않아도 될까요?
+    // STOMP의 경우 헤드에 인증 관련한 걸 넣을 수 있다고 해서 좀 더 알아보겠습니다.
     message.setSender(chatMessageDTO.getSender());
+
     message.setMessage(chatMessageDTO.getMessage());
     message.setSentAt(LocalDateTime.now());
-
-    ChatRoom chatRoom = new ChatRoom(); // 여기서 적절한 방법으로 채팅방을 조회해야 합니다.
-    chatRoom.setId(chatMessageDTO.getChatRoomId());
     message.setChatRoom(chatRoom);
 
     chatMessageRepository.save(message);
@@ -34,5 +42,5 @@ public class ChatService {
   public List<ChatMessage> getMessages(Long chatRoomId) {
     return chatMessageRepository.findByChatRoomId(chatRoomId);
   }
-
+  
 }
