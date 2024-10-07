@@ -14,6 +14,7 @@ public class ChatMessageDto {
 
   private Long chatRoomId;
   private Long senderId;
+  private String senderNickname;
   private String message;
   private LocalDateTime sentAt; // 메시지 전송시간
 

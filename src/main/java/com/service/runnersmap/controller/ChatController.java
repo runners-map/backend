@@ -1,10 +1,8 @@
 package com.service.runnersmap.controller;
 
-import com.service.runnersmap.ChatService;
 import com.service.runnersmap.dto.ChatMessageDto;
-import com.service.runnersmap.entity.ChatMessage;
+import com.service.runnersmap.service.ChatService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +33,11 @@ public class ChatController {
   // 메시지 전송
   @MessageMapping(value = "/message")
   public void sendMessage(ChatMessageDto message) {
-     try {
-       chatService.saveMessage(message);
-     } catch (RuntimeException e) {
-       log.error("메시지 전송 중 오류 발생 : {} ", e.getMessage());
-     }
+    try {
+      chatService.saveMessage(message);
+    } catch (RuntimeException e) {
+      log.error("메시지 전송 중 오류 발생 : {} ", e.getMessage());
+    }
 
   }
 

@@ -3,7 +3,6 @@ package com.service.runnersmap.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -12,7 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Slf4j
 @Configuration
 @EnableWebSocketMessageBroker   // stomp 사용을 위해 선언
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   // WebSocketConfigurer : 1대1 채팅방
   // WebSocketMessageBrokerConfigurer : 단톡방 - 메시징 시스템 필요
 
