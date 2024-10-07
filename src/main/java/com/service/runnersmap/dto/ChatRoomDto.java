@@ -11,7 +11,6 @@ import org.springframework.web.socket.WebSocketSession;
 public class ChatRoomDto {
 
   private String roomId;
-  private String roomName;
   private Set<WebSocketSession> sessions = new HashSet<>();
 
 }

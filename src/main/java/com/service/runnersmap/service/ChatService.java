@@ -3,10 +3,8 @@ package com.service.runnersmap.service;
 import com.service.runnersmap.dto.ChatMessageDto;
 import com.service.runnersmap.entity.ChatMessage;
 import com.service.runnersmap.entity.ChatRoom;
-import com.service.runnersmap.entity.User;
 import com.service.runnersmap.repository.ChatMessageRepository;
 import com.service.runnersmap.repository.ChatRoomRepository;
-import com.service.runnersmap.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +18,7 @@ public class ChatService {
 
   private final ChatMessageRepository chatMessageRepository;
   private final ChatRoomRepository chatRoomRepository;
-  private final UserRepository userRepository;
+  //private final UserRepository userRepository;
   private final SimpMessagingTemplate template;
 
 
@@ -45,15 +43,15 @@ public class ChatService {
 
 
     // 추후 jwt에서 사용자 정보 추출하는 로직 추가해야 함
-    User sender = userRepository.findById(chatMessageDto.getSenderId())
-        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+//    User sender = userRepository.findById(chatMessageDto.getSenderId())
+//        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
 
     ChatMessage message = ChatMessage.builder()
         .chatRoom(chatRoom)
         // 로그인 한 상태면 작성하지 않아도 될까요?
         // STOMP의 경우 헤드에 인증 관련한 걸 넣을 수 있다고 해서 좀 더 알아보겠습니다.
-        .sender(sender)
+        //.sender(sender)
         .message(chatMessageDto.getMessage())
         .sentAt(LocalDateTime.now())
         .build();
