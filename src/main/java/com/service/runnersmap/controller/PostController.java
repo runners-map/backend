@@ -40,26 +40,21 @@ public class PostController {
       @RequestParam(value = "startDate", required = false) LocalDate startDate,
       @RequestParam(value = "startTime", required = false) String startTime,
       @RequestParam(value = "limitMemberCnt", required = false) Integer limitMemberCnt
-  ) {
-    try {
+  ) throws Exception {
 
-      PostSearchDto inDto = new PostSearchDto();
-      inDto.setSwLatlng(swLatlng);
-      inDto.setNeLatlng(neLatlng);
-      inDto.setGender(gender);
-      inDto.setPaceMinStart(paceMinStart);
-      inDto.setPaceMinEnd(paceMinEnd);
-      inDto.setDistanceStart(distanceStart);
-      inDto.setDistanceEnd(distanceEnd);
-      inDto.setStartDate(startDate);
-      inDto.setStartTime(startTime);
-      inDto.setLimitMemberCnt(limitMemberCnt);
+    PostSearchDto inDto = new PostSearchDto();
+    inDto.setSwLatlng(swLatlng);
+    inDto.setNeLatlng(neLatlng);
+    inDto.setGender(gender);
+    inDto.setPaceMinStart(paceMinStart);
+    inDto.setPaceMinEnd(paceMinEnd);
+    inDto.setDistanceStart(distanceStart);
+    inDto.setDistanceEnd(distanceEnd);
+    inDto.setStartDate(startDate);
+    inDto.setStartTime(startTime);
+    inDto.setLimitMemberCnt(limitMemberCnt);
 
-      return ResponseEntity.ok(postService.searchPost(inDto));
-
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+    return ResponseEntity.ok(postService.searchPost(inDto));
   }
 
 
@@ -70,37 +65,26 @@ public class PostController {
   @GetMapping
   public ResponseEntity<?> searchDetailPost(
       @RequestParam(value = "postId") Long postId
-  ) {
-    try {
-      return ResponseEntity.ok(postService.searchDetailPost(postId));
-
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+  ) throws Exception {
+    return ResponseEntity.ok(postService.searchDetailPost(postId));
   }
 
   /*
    * 러닝모집글 신규 등록
    */
   @PostMapping
-  public ResponseEntity<?> registerPost(@RequestBody PostDto postDto) {
-    try {
-      return ResponseEntity.ok(postService.registerPost(postDto));
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+  public ResponseEntity<?> registerPost(@RequestBody PostDto postDto
+  ) throws Exception {
+    return ResponseEntity.ok(postService.registerPost(postDto));
   }
 
   /*
    * 러닝모집글 수정
    */
   @PutMapping
-  public ResponseEntity<?> modifyPost(@RequestBody PostDto postDto) {
-    try {
-      return ResponseEntity.ok(postService.modifyPost(postDto));
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+  public ResponseEntity<?> modifyPost(@RequestBody PostDto postDto
+  ) throws Exception {
+    return ResponseEntity.ok(postService.modifyPost(postDto));
   }
 
   /*
@@ -108,12 +92,10 @@ public class PostController {
    */
   @DeleteMapping
   public ResponseEntity<?> deletePost(
-      @RequestParam(value = "postId") Long postId) {
-    try {
-      postService.deletePost(postId);
-      return ResponseEntity.ok("삭제되었습니다.");
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+      @RequestParam(value = "postId") Long postId
+  ) throws Exception {
+    postService.deletePost(postId);
+    return ResponseEntity.ok("삭제되었습니다.");
   }
+
 }

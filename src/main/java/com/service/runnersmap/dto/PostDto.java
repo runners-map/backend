@@ -53,6 +53,7 @@ public class PostDto {
     }
 
     return PostDto.builder()
+        .postId(post.getPostId())
         .adminId(post.getAdminId())
         .title(post.getTitle())
         .content(post.getContent())
