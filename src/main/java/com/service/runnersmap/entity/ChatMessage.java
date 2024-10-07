@@ -28,10 +28,13 @@ public class ChatMessage {
   @JoinColumn(name = "user_id")
   private User sender; // 메시지 보낸 사용자
 
-  private String message; // 메시지 내용
-  private LocalDateTime sentAt; // 전송시간
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "chat_room_id")
   private ChatRoom chatRoom;  // 메시지가 속하는 채팅방
+
+
+  private String message; // 메시지 내용
+
+  private LocalDateTime sentAt; // 전송시간
+
 }

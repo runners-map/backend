@@ -1,17 +1,15 @@
 package com.service.runnersmap.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,8 +24,13 @@ public class ChatRoom {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String roomName;  // 들어가야 할까요? 모집글이랑 이으면 될까요?
+//  @ManyToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "admin_id")
+//  private User admin; // 그룹장
 
-  @OneToMany(mappedBy = "chatRoom")
-  private List<UserChatRoom> userChatRooms;
+  @OneToOne
+  @JoinColumn(name = "post_id")
+  private Post post; // 연결된 모집글
+
+
 }
