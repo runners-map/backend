@@ -24,12 +24,12 @@ public class ChatRoom {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-//  @ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "admin_id")
-//  private User admin; // 그룹장
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "admin_id")
+  private User admin; // 그룹장
 
-//  @OneToOne
-//  @JoinColumn(name = "post_id")
-//  private Post post; // 연결된 모집글
+  @OneToOne
+  @JoinColumn(name = "post_id")
+  private Post post; // 연결된 모집글
 
 }
