@@ -1,4 +1,4 @@
-package com.service.runnersmap;
+package com.service.runnersmap.repository;
 
 import com.service.runnersmap.entity.User;
 import java.util.Optional;
