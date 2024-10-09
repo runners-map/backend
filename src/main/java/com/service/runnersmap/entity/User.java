@@ -27,6 +27,11 @@ public class User extends BaseTimeEntity {
   @Column(name = "gender", nullable = false)
   private String gender;
 
+
+  @Column(name = "custom_time", nullable = false)
+  private String customTime;
+
+
   @Column(name = "provider", nullable = false)
   private String provider;
 
