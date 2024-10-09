@@ -5,12 +5,18 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserPostPK implements Serializable {
 
-  private Long userId;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id", nullable = false)
+  private User userId;
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "postId", nullable = false)

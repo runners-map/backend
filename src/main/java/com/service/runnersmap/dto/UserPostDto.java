@@ -1,19 +1,25 @@
 package com.service.runnersmap.dto;
 
+import jakarta.persistence.Column;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecordDto {
+@Getter
+@Setter
+public class UserPostDto {
 
   private Long postId;
 
   private Long userId;
 
-  private Long runningDistance;
+  private Double distance;
 
+  private String runningTime;
+
+  private int day;
 }

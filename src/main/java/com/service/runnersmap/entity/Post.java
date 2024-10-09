@@ -41,7 +41,7 @@ public class Post {
   private String content; //내용
 
   @Column(nullable = false)
-  private Long limitMemberCnt; //제한인원
+  private Integer limitMemberCnt; //제한인원
 
   @Column(nullable = true)
   private String gender; //모집성별
@@ -53,7 +53,7 @@ public class Post {
   private String startPosition;  //출발장소
 
   @Column(nullable = false)
-  private Long distance; // 달릴거리
+  private Double distance; // 달릴거리
 
   @Column(nullable = false)
   private Integer paceMin; //예상 페이스분
