@@ -21,7 +21,7 @@ public class PostDto {
 
   private String content; //내용
 
-  private Long limitMemberCnt; //제한인원
+  private Integer limitMemberCnt; //제한인원
 
   private String gender; //모집성별
 
@@ -29,7 +29,7 @@ public class PostDto {
 
   private String startPosition;  //출발장소
 
-  private Long distance; // 달릴거리
+  private Double distance; // 달릴거리
 
   private Integer paceMin; //예상 페이스분
 
