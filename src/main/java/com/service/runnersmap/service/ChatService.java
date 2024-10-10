@@ -1,12 +1,16 @@
 package com.service.runnersmap.service;
 
-import com.service.runnersmap.UserRepository;
 import com.service.runnersmap.dto.ChatMessageDto;
 import com.service.runnersmap.entity.ChatMessage;
 import com.service.runnersmap.entity.ChatRoom;
+import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.entity.User;
+import com.service.runnersmap.entity.UserPost;
+import com.service.runnersmap.entity.UserPostPK;
 import com.service.runnersmap.repository.ChatMessageRepository;
 import com.service.runnersmap.repository.ChatRoomRepository;
+import com.service.runnersmap.repository.UserPostRepository;
+import com.service.runnersmap.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ public class ChatService {
   private final ChatMessageRepository chatMessageRepository;
   private final ChatRoomRepository chatRoomRepository;
   private final UserRepository userRepository;
+  private final UserPostRepository userPostRepository;
   private final SimpMessagingTemplate template;
 
 
@@ -33,56 +38,74 @@ public class ChatService {
     User sender = userRepository.findById(chatMessageDto.getSenderId())
         .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
-    // UserPost 테이블에서 사용자의 참여상태 확인
-    // boolean isExiting = !userPostRepository.existsByUserIdAndPostId(sender.getId(), chatMessageDto.getChatRoomId());
-    //
-//    if (isExisting) {
-//      String enterMessage = sender.getNickname() + "님이 채팅방에 입장하셨습니다.";
-//      chatMessageDto = ChatMessageDto.builder()
-//        .chatRoomId(chatMessageDto.getChatRoomId())
-//        .senderId(sender.getId())
-//        .senderNickname(sender.getNickname())
-//        .message(enterMessage)
-//        .build();
-//    }
+    ChatRoom chatRoom = chatRoomRepository.findByPostId(chatMessageDto.getChatRoomId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방"));
 
-// UserPost에 참여기록 추가
-//    UserPost userPost = UserPost.builder()
-//        .user(sender)
-//        .post(chatRoom.getPost())
-//        .build();
-//    userPostRepository.save(userPost);
+    Post post = chatRoom.getPost();
 
-    // 브로커로 메시지 전송
-    template.convertAndSend("/sub/chat/room/" + chatMessageDto.getChatRoomId(), chatMessageDto);
+    // UserPost를 조회해서 사용자의 채팅방 참여상태 확인
+    UserPost userPost = userPostRepository.findById(new UserPostPK(sender, post))
+        .orElse(null); // 없으면 null
+
+    // null인 경우 = 첫 입장
+    if (userPost == null) {
+      userPost = UserPost.builder()
+          .id(new UserPostPK(sender, post))
+          .valid_yn(true) //
+          .build();
+    } else {
+      // 퇴장한 적이 있는 경우, false => 다시 입장하면 true로 업데이트
+      if (!userPost.getValid_yn()) {
+        userPost.setValid_yn(true);
+      }
+    }
+    userPostRepository.save(userPost);
+
+    String enterMessage = sender.getNickname() + "님이 채팅방에 입장하셨습니다.";
+    chatMessageDto = ChatMessageDto.builder()
+        .message(enterMessage)
+        .build();
+    template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), chatMessageDto);
+
+    // 이전 메시지들 불러오기
+    List<ChatMessageDto> previousMessages = getMessages(chatRoom.getId());
+    for (ChatMessageDto previousMessage : previousMessages) {
+      template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), previousMessage);
+    }
+
   }
 
 
   /**
-   * 퇴장시 퇴장 알림 메시지 전송 메서드
+   * 사용자가 퇴장시 퇴장 알림 메시지 전송 메서드
    */
   public void handleUserExit(ChatMessageDto chatMessageDto) {
 
     User sender = userRepository.findById(chatMessageDto.getSenderId())
         .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
-    // UserPost에서 사용자 삭제
-    //userPostRepository.deleteByUserIdAndPostId(sender.getId(), chatMessageDto.getChatRoomId());
+    ChatRoom chatRoom = chatRoomRepository.findByPostId(chatMessageDto.getChatRoomId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방"));
+
+    Post post = chatRoom.getPost();
+
+    // UserPost에서 valid_yn을 false로 변경
+    UserPost userPost = userPostRepository.findById(new UserPostPK(sender, post))
+        .orElseThrow(() -> new RuntimeException("참여기록 없음"));
+    userPost.setValid_yn(false);
+    userPostRepository.save(userPost);
 
     String exitMessage = sender.getNickname() + "님이 채팅방을 나갔습니다.";
-    chatMessageDto = ChatMessageDto.builder()
-        .chatRoomId(chatMessageDto.getChatRoomId())
-        .senderId(sender.getId())
-        .senderNickname(sender.getNickname())
+    chatMessageDto.builder()
         .message(exitMessage)
         .build();
 
-    template.convertAndSend("/sub/chat/room/" + chatMessageDto.getChatRoomId(), chatMessageDto);
+    template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), chatMessageDto);
   }
 
 
   /**
-   * 메시지 저장 & 전송하는 메서드
+   * 클라이언트가 보낸 메시지를 저장하고 브로드캐스트하는 메서드
    */
   public void saveAndBroadcastMessage(ChatMessageDto chatMessageDto) {
 

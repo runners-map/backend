@@ -17,5 +17,6 @@ public class ChatMessageDto {
   private String senderNickname;
   private String message;
   private LocalDateTime sentAt; // 메시지 전송시간
+  private Long postId;
 
 }
