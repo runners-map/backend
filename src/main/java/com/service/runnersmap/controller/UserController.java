@@ -36,6 +36,14 @@ public class UserController {
     return ResponseEntity.ok(tokenResponse);
   }
 
+  // 로그아웃 API
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(@AuthenticationPrincipal UserDetails userDetails) {
+    String email = userDetails.getUsername();
+    userService.logout(email);
+    return ResponseEntity.ok("로그아웃 되었습니다.");
+  }
+
   // 회원탈퇴 API
   @DeleteMapping("/account")
   public ResponseEntity<String> deleteAccount(

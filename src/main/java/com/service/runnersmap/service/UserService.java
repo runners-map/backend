@@ -90,4 +90,15 @@ public class UserService {
     // 사용자 삭제
     userRepository.delete(user);
   }
+
+  /**
+   * 로그아웃
+   */
+  @Transactional
+  public void logout(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UserNotFoundException("사용자가 존재하지 않습니다."));
+    // 리프레시 토큰 삭제
+    refreshTokenRepository.deleteByUser(user);
+  }
 }

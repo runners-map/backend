@@ -21,7 +21,7 @@ public class JwtTokenProvider {
 
   // 만료 시간
   private static final long TOKEN_EXPIRED_TIME = 1000 * 60 * 60; // 1시간
-  private static final long REFRESH_TOKEN_EXPIRED_TIME = 1000 * 60 * 60 * 24 * 7; // 리프레시토큰 7일
+  private static final long REFRESH_TOKEN_EXPIRED_TIME = 1000 * 60 * 60 * 24 * 15; // 리프레시토큰 15일
   // 알고리즘
   private static final SignatureAlgorithm algorithm = SignatureAlgorithm.HS256;
 
