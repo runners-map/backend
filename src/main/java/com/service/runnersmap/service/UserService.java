@@ -30,16 +30,25 @@ public class UserService {
    * 회원가입 이메일, 비밀번호, 닉네임, 성별 입력
    */
   public void signUp(SignUpDto signUpDto) {
+
+    // 중복 회원가입 불가
     if (userRepository.findByEmail(signUpDto.getEmail()).isPresent()) {
-      throw new UnAuthorizedException("이미 회원가입 된 이메일입니다.");
+      throw new IllegalArgumentException("이미 회원가입 된 이메일입니다.");
     }
+    // 비밀번호 확인 로직 추가
+    if (!signUpDto.getPassword().equals(signUpDto.getConfirmPassword())) {
+      throw new IllegalArgumentException("비밀번호를 다시 확인해주세요");
+    }
+    // 동일 닉네임 사용 불가
+    if (userRepository.findByNickname(signUpDto.getNickname()).isPresent()) {
+      throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+    }
+
     User user = User.builder()
         .email(signUpDto.getEmail())
         .password(passwordEncoder.encode(signUpDto.getPassword()))
         .nickname(signUpDto.getNickname())
         .gender(signUpDto.getGender())
-        .paceMin(signUpDto.getPaceMin())
-        .paceSec(signUpDto.getPaceSec())
         .createdAt(LocalDateTime.now())
         .build();
     userRepository.save(user);

@@ -16,21 +16,17 @@ public class User {
   @Column(name = "users_id")
   private Long id;
 
-  @Column(name = "email")
+  @Column(name = "email", nullable = false)
   private String email;
 
-  @Column(name = "password")
+  @Column(name = "password", nullable = false)
   private String password;
 
-  @Column(name = "nickname")
+  @Column(name = "nickname", nullable = false)
   private String nickname;
 
   @Column(name = "gender")
   private String gender;
-
-  // 페이스
-  private int paceMin;
-  private int paceSec;
 
   // 누적거리
   private double totalDistance;
