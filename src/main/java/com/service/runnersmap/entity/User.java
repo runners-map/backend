@@ -1,6 +1,7 @@
 package com.service.runnersmap.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 
 @Entity
@@ -9,34 +10,48 @@ import lombok.*;
 @Builder
 @Getter
 @Table(name = "users")
-public class User extends BaseTimeEntity {
+public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "users_id")
   private Long id;
 
-  @Column(name = "email", nullable = false)
+  @Column(name = "email")
   private String email;
 
-  @Column(name = "password", nullable = false)
+  @Column(name = "password")
   private String password;
 
-  @Column(name = "nickname", nullable = false)
+  @Column(name = "nickname")
   private String nickname;
 
-  @Column(name = "gender", nullable = false)
+  @Column(name = "gender")
   private String gender;
 
+  // 페이스
+  private int paceMin;
+  private int paceSec;
 
-  @Column(name = "custom_time", nullable = false)
-  private String customTime;
+  // 누적거리
+  private double totalDistance;
+
+  // 마지막 위치
+  private String lastPosition;
+
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
 
-  @Column(name = "provider", nullable = false)
-  private String provider;
+// 알림 시간
+//  @Column(name = "custom_time")
+//  private String customTime;
 
-  @Column(name = "provider_id", nullable = false)
-  private String providerId;
+// Oauth 관련 컬럼
+//  @Column(name = "provider")
+//  private String provider;
+//
+//  @Column(name = "provider_id")
+//  private String providerId;
 
 }
 
