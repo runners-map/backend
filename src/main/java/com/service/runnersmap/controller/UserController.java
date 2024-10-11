@@ -4,8 +4,11 @@ import com.service.runnersmap.dto.TokenResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
+import com.service.runnersmap.exception.custom.UnAuthorizedException;
+import com.service.runnersmap.exception.custom.UserNotFoundException;
 import com.service.runnersmap.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,35 +27,55 @@ public class UserController {
 
   // 회원가입 API
   @PostMapping("/sign-up")
-  public ResponseEntity<String> signUp(@RequestBody SignUpDto signUpDto) {
-    userService.signUp(signUpDto);
-    return ResponseEntity.ok("회원가입 되었습니다.");
+  public ResponseEntity<Void> signUp(@RequestBody SignUpDto signUpDto) {
+    try {
+      userService.signUp(signUpDto);
+      return ResponseEntity.status(HttpStatus.CREATED).build(); // 201 Created
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 Bad request
+    }
   }
 
   // 로그인 API
   @PostMapping("/login")
   public ResponseEntity<TokenResponse> login(@RequestBody LoginDto loginDto) {
-    TokenResponse tokenResponse = userService.login(loginDto);
-    return ResponseEntity.ok(tokenResponse);
+    try {
+      TokenResponse tokenResponse = userService.login(loginDto); // 200 OK
+      return ResponseEntity.ok(tokenResponse);
+    } catch (UnAuthorizedException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+    }
+
   }
 
   // 로그아웃 API
   @PostMapping("/logout")
-  public ResponseEntity<String> logout(@AuthenticationPrincipal UserDetails userDetails) {
-    String email = userDetails.getUsername();
-    userService.logout(email);
-    return ResponseEntity.ok("로그아웃 되었습니다.");
+  public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
+    try {
+      String email = userDetails.getUsername();
+      userService.logout(email);
+      return ResponseEntity.ok().build(); // 200 OK
+    } catch (UserNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 Bad Request
+    }
+
   }
 
   // 회원탈퇴 API
   @DeleteMapping("/account")
-  public ResponseEntity<String> deleteAccount(
+  public ResponseEntity<Void> deleteAccount(
       @AuthenticationPrincipal UserDetails userDetails,
       @RequestBody AccountDeleteDto accountDeleteDto) {
+    try {
+      String email = userDetails.getUsername();
+      userService.deleteAccount(email, accountDeleteDto);
+      return ResponseEntity.noContent().build(); // 204 No Content
+    } catch (UserNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found
+    } catch (UnAuthorizedException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+    }
 
-    String email = userDetails.getUsername();
-    userService.deleteAccount(email, accountDeleteDto);
-    return ResponseEntity.ok("계정이 삭제됐습니다.");
   }
 
 }
