@@ -3,6 +3,7 @@ package com.service.runnersmap.service;
 import com.service.runnersmap.component.JwtTokenProvider;
 import com.service.runnersmap.dto.TokenResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;
+import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
@@ -110,6 +111,20 @@ public class UserService {
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
     // 리프레시 토큰 삭제
     refreshTokenRepository.deleteByUser(user);
+  }
+
+  /**
+   * 회원정보 조회
+   */
+  public AccountInfoDto getAccountInfo(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
+
+    return AccountInfoDto.builder()
+        .nickname(user.getNickname())
+        .email(user.getEmail())
+        .gender(user.getGender())
+        .build();
   }
 
   /**

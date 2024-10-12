@@ -44,6 +44,19 @@ public class UserDto {
   @NoArgsConstructor
   @AllArgsConstructor
   @Builder
+  public static class AccountInfoDto {
+    private String nickname;
+    private String email;
+    private String gender;
+    // private String profileImgUrl
+
+  }
+
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
   public static class AccountUpdateDto {
     private String newNickname;
     private String newPassword;
