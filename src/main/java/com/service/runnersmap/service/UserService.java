@@ -15,12 +15,15 @@ import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
   private final UserRepository userRepository;
@@ -33,6 +36,7 @@ public class UserService {
    */
   public void signUp(SignUpDto signUpDto) {
 
+    log.info("회원가입 시도: {} ", signUpDto.getEmail());
     // 중복 회원가입 불가
     if (userRepository.findByEmail(signUpDto.getEmail()).isPresent()) {
       throw new RunnersMapException(ErrorCode.ALREADY_EXISTS_USER);
@@ -54,12 +58,15 @@ public class UserService {
         .createdAt(LocalDateTime.now())
         .build();
     userRepository.save(user);
+    log.info("회원가입 완료");
   }
 
   /**
    * 로그인 이메일, 비밀번호 입력
    */
   public TokenResponse login(LoginDto loginDto) {
+    log.info("로그인 요청: {} ", loginDto.getEmail())
+    ;
     User user = userRepository.findByEmail(loginDto.getEmail())
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
@@ -78,6 +85,7 @@ public class UserService {
         .build();
     refreshTokenRepository.save(refreshTokenEntity);
 
+    log.info("로그인 성공");
     return new TokenResponse(accessToken, refreshToken);
   }
 
@@ -86,6 +94,7 @@ public class UserService {
    */
   @Transactional
   public void deleteAccount(String email, AccountDeleteDto accountDeleteDto) {
+    log.info("회원탈퇴 요청: {}", email);
 
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
@@ -100,6 +109,7 @@ public class UserService {
 
     // 사용자 삭제
     userRepository.delete(user);
+    log.info("회원탈퇴 완료");
   }
 
   /**
@@ -107,16 +117,21 @@ public class UserService {
    */
   @Transactional
   public void logout(String email) {
+    log.info("로그아웃 요청: {} ", email);
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
     // 리프레시 토큰 삭제
     refreshTokenRepository.deleteByUser(user);
+    // SecurityContext 초기화
+    SecurityContextHolder.clearContext();
+    log.info("로그아웃 완료");
   }
 
   /**
    * 회원정보 조회
    */
   public AccountInfoDto getAccountInfo(String email) {
+    log.info("회원정보 조회 요청: {}", email);
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
@@ -130,8 +145,10 @@ public class UserService {
   /**
    * 회원정보 수정 (닉네임, 비밀번호, 프로필사진 등록/수정)
    */
+  @Transactional
   public void updateAccount(String email, AccountUpdateDto accountUpdateDto) {
 
+    log.info("회원정보 수정 요청 : {}", email);
     // 프로필 사진 등록/수정을 위한 MultipartFile profileImage는 추후 구현예정
 
     User user = userRepository.findByEmail(email)
@@ -160,5 +177,6 @@ public class UserService {
 //    }
     user.setUpdatedAt(LocalDateTime.now());
     userRepository.save(user);
+    log.info("회원정보 수정 완료");
   }
 }
