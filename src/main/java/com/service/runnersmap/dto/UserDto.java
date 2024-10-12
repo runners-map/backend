@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 public class UserDto {
 
@@ -36,5 +37,16 @@ public class UserDto {
   @Builder
   public static class AccountDeleteDto {
     private String password;
+  }
+
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class AccountUpdateDto {
+    private String newNickname;
+    private String newPassword;
+    private String newConfirmPassword;
   }
 }

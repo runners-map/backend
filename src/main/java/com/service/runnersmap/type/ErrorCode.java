@@ -26,6 +26,15 @@ public enum ErrorCode {
 
   NOT_POST_INCLUDE_USER("모집글에 참여한 사용자가 아니므로 처리 불가합니다."),
 
+
+  // 유저 관련 에러코드
+  ALREADY_EXISTS_USER("이미 회원가입 된 이메일입니다."),
+
+  NOT_VALID_PASSWORD("비밀번호를 다시 확인해주세요"),
+
+  ALREADY_EXISTS_NICKNAME("이미 사용중인 닉네임입니다.")
+
+
   ;
 
   private final String description;
