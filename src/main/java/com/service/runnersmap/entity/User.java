@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 @Table(name = "users")
 public class User {
   @Id
@@ -34,13 +35,11 @@ public class User {
   // 마지막 위치
   private String lastPosition;
 
+  // 프로필 사진 URL
+  private String profileImageUrl;
+
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-
-
-// 알림 시간
-//  @Column(name = "custom_time")
-//  private String customTime;
 
 // Oauth 관련 컬럼
 //  @Column(name = "provider")
