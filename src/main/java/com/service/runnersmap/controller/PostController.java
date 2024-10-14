@@ -1,11 +1,16 @@
 package com.service.runnersmap.controller;
 
 import com.service.runnersmap.dto.PostDto;
-import com.service.runnersmap.dto.PostSearchDto;
+import com.service.runnersmap.dto.PostInDto;
+import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.service.PostService;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +30,13 @@ public class PostController {
   private final PostService postService;
 
   /*
-   * 러닝모집글 내역 조회
-   * Elastic Search
+   * 러닝모집글/인증샷 내역 조회
+   * - 지도에 표시될 데이터를 표시한다.
    */
-  @GetMapping("/all-posts")
-  public ResponseEntity<?> searchPost(
-      @RequestParam(value = "swLatlng") Double swLatlng,
-      @RequestParam(value = "neLatlng") Double neLatlng,
+  @GetMapping("/map-posts")
+  public ResponseEntity<List<PostDto>> searchMapPost(
+      @RequestParam(value = "centerLat") Double centerLat,
+      @RequestParam(value = "centerLng") Double centerLng,
       @RequestParam(value = "gender", required = false) String gender,
       @RequestParam(value = "paceMinStart", required = false) Integer paceMinStart,
       @RequestParam(value = "paceMinEnd", required = false) Integer paceMinEnd,
@@ -42,9 +47,9 @@ public class PostController {
       @RequestParam(value = "limitMemberCnt", required = false) Integer limitMemberCnt
   ) throws Exception {
 
-    PostSearchDto inDto = new PostSearchDto();
-    inDto.setSwLatlng(swLatlng);
-    inDto.setNeLatlng(neLatlng);
+    PostInDto inDto = new PostInDto();
+    inDto.setLat(centerLat);
+    inDto.setLng(centerLng);
     inDto.setGender(gender);
     inDto.setPaceMinStart(paceMinStart);
     inDto.setPaceMinEnd(paceMinEnd);
@@ -54,26 +59,33 @@ public class PostController {
     inDto.setStartTime(startTime);
     inDto.setLimitMemberCnt(limitMemberCnt);
 
-    return ResponseEntity.ok(postService.searchPost(inDto));
+    return ResponseEntity.ok(
+        postService.searchPost(inDto).stream().map(p -> PostDto.fromEntity(p)).collect(Collectors.toList())
+    );
   }
-
 
   /*
    * 러닝모집글 상세조회
-   * Elastic Search
    */
   @GetMapping
-  public ResponseEntity<?> searchDetailPost(
+  public ResponseEntity<PostDto> searchDetailPost(
       @RequestParam(value = "postId") Long postId
   ) throws Exception {
-    return ResponseEntity.ok(postService.searchDetailPost(postId));
+    Optional<Post> post = postService.searchDetailPost(postId);
+    if(post.isPresent()) {
+      PostDto postDto = PostDto.fromEntity(post.get());
+      return ResponseEntity.ok(postDto);
+    } else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(null);
+    }
   }
 
   /*
    * 러닝모집글 신규 등록
    */
   @PostMapping
-  public ResponseEntity<?> registerPost(@RequestBody PostDto postDto
+  public ResponseEntity<Post> registerPost(@RequestBody PostDto postDto
   ) throws Exception {
     return ResponseEntity.ok(postService.registerPost(postDto));
   }
@@ -82,7 +94,7 @@ public class PostController {
    * 러닝모집글 수정
    */
   @PutMapping
-  public ResponseEntity<?> modifyPost(@RequestBody PostDto postDto
+  public ResponseEntity<Post> modifyPost(@RequestBody PostDto postDto
   ) throws Exception {
     return ResponseEntity.ok(postService.modifyPost(postDto));
   }
@@ -91,11 +103,11 @@ public class PostController {
    * 러닝모집글 삭제
    */
   @DeleteMapping
-  public ResponseEntity<?> deletePost(
+  public ResponseEntity<Void> deletePost(
       @RequestParam(value = "postId") Long postId
   ) throws Exception {
     postService.deletePost(postId);
-    return ResponseEntity.ok("삭제되었습니다.");
+    return ResponseEntity.noContent().build();
   }
 
 }

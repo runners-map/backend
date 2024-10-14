@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,6 +29,15 @@ public class UserPost {
 
   @EmbeddedId
   private UserPostPK id; // 복합 키(postId, userId)
+
+  // 테이블간 관계를 지정하기 위해 추가
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "users_id", insertable = false, updatable = false)
+  private User user;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "postId", insertable = false, updatable = false)
+  private Post post;
 
   @Column(nullable = true)
   private Boolean valid_yn; // 유효여부(탈퇴, 강퇴여부)

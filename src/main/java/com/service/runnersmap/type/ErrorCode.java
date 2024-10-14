@@ -26,6 +26,9 @@ public enum ErrorCode {
 
   NOT_POST_INCLUDE_USER("모집글에 참여한 사용자가 아니므로 처리 불가합니다."),
 
+  ALREADY_PARTICIPATE_USER("이미 참여 중인 이용자입니다."),
+
+  NOT_FOUND_PARTICIPATE_USER("해당 이용자는 이미 모집글에 참여하지 않는 이용자 입니다."),
 
   // 유저 관련 에러코드
   ALREADY_EXISTS_USER("이미 회원가입 된 이메일입니다."),

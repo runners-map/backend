@@ -1,7 +1,5 @@
 package com.service.runnersmap.dto;
 
-import jakarta.persistence.Column;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,4 +20,5 @@ public class UserPostDto {
   private String runningTime;
 
   private int day;
+
 }
