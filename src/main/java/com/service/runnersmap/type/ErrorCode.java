@@ -32,9 +32,13 @@ public enum ErrorCode {
 
   NOT_VALID_PASSWORD("비밀번호를 다시 확인해주세요"),
 
-  ALREADY_EXISTS_NICKNAME("이미 사용중인 닉네임입니다.")
+  ALREADY_EXISTS_NICKNAME("이미 사용중인 닉네임입니다."),
 
 
+  // 댓글 관련 에러코드
+  NOT_FOUND_COMMENT("댓글이 존재하지 않습니다."),
+
+  WRITER_ONLY_ACCESS_COMMENT_DATA("댓글 작성자만 수정/삭제가 가능합니다.")
   ;
 
   private final String description;
