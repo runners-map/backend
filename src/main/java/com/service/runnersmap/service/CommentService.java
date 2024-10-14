@@ -36,6 +36,8 @@ public class CommentService {
   @Transactional
   public void createComment(Long postId, Long userId, CommentDto commentDto) {
 
+    log.info("댓글 작성 요청");
+
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
 
@@ -43,7 +45,10 @@ public class CommentService {
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
     UserPost userPost = userPostRepository.findById(new UserPostPK(user, post))
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
+        .orElseThrow(() -> {
+          log.error("사용자가 해당 모집글에 포함되어 있지 않습니다 - 게시글 ID: {}, 사용자 ID: {}", postId, userId);
+          return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
+        });
 
     if (!userPost.getValid_yn()) {
       throw new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
@@ -66,6 +71,7 @@ public class CommentService {
    */
   @Transactional(readOnly = true)
   public Page<CommentDto> getComments(Long postId, Long userId, Pageable pageable) {
+    log.info("댓글 조회 요청 - 게시글 ID: {}", postId);
 
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
@@ -83,7 +89,8 @@ public class CommentService {
     return commentRepository.findByPost(post, pageable)
         .map(comment -> new CommentDto(
             comment.getUser().getNickname(),
-            comment.getContent()
+            comment.getContent(),
+            comment.getCreatedAt()
         ));
   }
 
@@ -115,7 +122,7 @@ public class CommentService {
    */
   @Transactional
   public void deleteComment(Long commentId, Long userId) {
-    log.info("댓글 삭제 요청");
+    log.info("댓글 삭제 요청 - 댓글 ID: {}, 사용자 ID: {}", commentId, userId);
 
     Comment comment = commentRepository.findById(commentId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_COMMENT));

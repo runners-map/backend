@@ -14,4 +14,5 @@ public class CommentDto {
 
   private String nickname;
   private String content;
+  private LocalDateTime createdAt;
 }
