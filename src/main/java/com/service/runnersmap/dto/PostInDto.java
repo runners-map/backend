@@ -10,10 +10,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostSearchDto {
+public class PostInDto {
 
-  private Double swLatlng;
-  private Double neLatlng;
+  private Double lat;
+  private Double lng;
   private String gender;
   private Integer paceMinStart;
   private Integer paceMinEnd;

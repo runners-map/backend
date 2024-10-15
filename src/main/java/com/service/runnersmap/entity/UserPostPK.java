@@ -1,4 +1,7 @@
 package com.service.runnersmap.entity;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -12,15 +15,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Embeddable
 public class UserPostPK implements Serializable {
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id", nullable = false)
-  private User userId;
+  private Long userId;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "postId", nullable = false)
-  private Post postId;
+  private Long postId;
 
   @Override
   public boolean equals(Object o) {

@@ -33,29 +33,29 @@ public class CommentController {
 
   // 댓글 작성
   @PostMapping("/{postId}")
-  public ResponseEntity<Void> createComment(
+  public ResponseEntity<CommentDto> createComment(
       @AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long postId,
       @RequestBody CommentDto commentDto)  {
 
     User user = getCurrentUser(userDetails);
 
-    commentService.createComment(postId, user.getId(), commentDto);
-    return ResponseEntity.status((HttpStatus.CREATED)).build(); //201 Created
+    CommentDto createdComment = commentService.createComment(postId, user.getId(), commentDto);
+    return ResponseEntity.status((HttpStatus.CREATED)).body(createdComment); //201 Created
   }
 
 
   // 댓글 수정
   @PatchMapping("/{commentId}")
-  public ResponseEntity<Void> updateComment(
+  public ResponseEntity<CommentDto> updateComment(
       @AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long commentId,
       @RequestBody CommentDto commentDto) {
 
     User user = getCurrentUser(userDetails);
 
-    commentService.updateComment(commentId, user.getId(), commentDto);
-    return ResponseEntity.ok().build(); // 200 OK
+    CommentDto updatedComment = commentService.updateComment(commentId, user.getId(), commentDto);
+    return ResponseEntity.ok(updatedComment); // 200 OK
   }
 
 
