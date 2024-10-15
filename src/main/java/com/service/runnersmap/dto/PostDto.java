@@ -54,7 +54,7 @@ public class PostDto {
 
     return PostDto.builder()
         .postId(post.getPostId())
-        .adminId(post.getAdminId())
+        .adminId(post.getAdmin().getId())
         .title(post.getTitle())
         .content(post.getContent())
         .limitMemberCnt(post.getLimitMemberCnt())

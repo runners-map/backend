@@ -69,7 +69,7 @@ public class PostService {
 
     // post 테이블 insert
     Post post = postRepository.save(Post.builder()
-        .adminId(postDto.getAdminId())
+        .admin(user)
         .title(postDto.getTitle())
         .content(postDto.getContent())
         .limitMemberCnt(postDto.getLimitMemberCnt())
@@ -160,9 +160,10 @@ public class PostService {
 
   private void validatePost(Post post) {
     // 해당 채팅방의 그룹장 이외에는 불가
-    if (!post.getAdminId().equals(post.getAdminId())) {
-      throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
-    }
+//    if (!post.getAdmin().getId().equals(post.getAdminId())) {
+//      throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
+//    }
+
     // 시작 전의 러닝 글에 대해서만 가능
     if (post.getDepartureYn()) {
       throw new RunnersMapException(ErrorCode.ALREADY_START_POST_DATA);

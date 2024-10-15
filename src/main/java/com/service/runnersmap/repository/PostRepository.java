@@ -2,7 +2,6 @@ package com.service.runnersmap.repository;
 
 import com.service.runnersmap.entity.Post;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,21 +59,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
       "FROM Post p " +
-      "WHERE p.adminId = :adminId " +
+      "WHERE p.admin.id = :adminId " +
       "AND (p.arriveYn IS NULL OR p.arriveYn = false)")
   boolean existsByAdminIdAndArriveYnFalse(
       @Param("adminId") Long adminId);
-
-  @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
-      "FROM Post p " +
-      "WHERE p.adminId = :adminId " +
-      "AND p.startDateTime >= :startDateTime " +
-      "AND p.startDateTime < :endDateTime " +
-      "AND (p.arriveYn IS NULL OR p.arriveYn = false)")
-  boolean existsByAdminIdAndStartDateTimeAndArriveYnFalse(
-      @Param("adminId") Long adminId,
-      @Param("startDateTime") LocalDateTime startDateTime,
-      @Param("endDateTime") LocalDateTime endDateTime);
 
 
   @Query(" SELECT p " +

@@ -3,9 +3,12 @@ package com.service.runnersmap.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -31,8 +34,11 @@ public class Post {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long postId; //메이트모집글ID
 
-  @Column(nullable = false)
-  private Long adminId; //그룹장ID ( User랑 조인 )
+
+  // 직렬화 시 오류 발생 하여 EAGER 설정으로 User 데이터도 전체 가져오도록 처리
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "users_id")
+  private User admin;
 
   @Column(nullable = false)
   private String title; //제목
