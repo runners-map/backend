@@ -12,6 +12,8 @@ public enum ErrorCode {
 
   ALREADY_DEPARTURE_POST_DATA("이미 시작 처리된 내역입니다."),
 
+  ALREADY_START_POST_DATA("이미 시작처리된 내역입니다."),
+
   ALREADY_COMPLETE_POST_DATA("이미 완료처리된 내역입니다."),
   
   OWNER_ONLY_ACCESS_POST_DATA("그룹장만 변경할 수 있습니다."),

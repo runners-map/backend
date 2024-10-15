@@ -43,9 +43,9 @@ public class PostDto {
 
   private Long chatRoomId; //채팅방 ID
 
-  private Double swLatlng;
+  private Double centerLat;
 
-  private Double neLatlng;
+  private Double centerLng;
 
   public static PostDto fromEntity(Post post) {
     if (post == null) {
@@ -65,8 +65,8 @@ public class PostDto {
         .paceMin(post.getPaceMin())
         .paceSec(post.getPaceSec())
         .path(post.getPath())
-        .swLatlng(post.getLat())
-        .neLatlng(post.getLng())
+        .centerLat(post.getLat())
+        .centerLng(post.getLng())
         .departureYn(post.getDepartureYn())
         .arriveYn(post.getArriveYn())
         .build();

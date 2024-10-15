@@ -11,10 +11,11 @@ import com.service.runnersmap.repository.PostRepository;
 import com.service.runnersmap.repository.UserPostRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,7 @@ public class PostService {
 
 
   @Transactional(readOnly = true)
-  public List<Post> searchPost(PostInDto inDto) throws Exception {
+  public Page<Post> searchPost(PostInDto inDto, Pageable pageable) throws Exception {
 
     return postRepository.findAllWithin1Km(
         inDto.getLat(),
@@ -44,7 +45,8 @@ public class PostService {
         inDto.getDistanceEnd(),
         inDto.getStartDate(),
         inDto.getStartTime(),
-        inDto.getLimitMemberCnt()
+        inDto.getLimitMemberCnt(),
+        pageable
     );
   }
 
@@ -54,18 +56,10 @@ public class PostService {
   }
 
   public Post registerPost(PostDto postDto) throws Exception {
-    log.info("started to registerPost Title");
 
     // admin(그룹장)이 유효한 사용자인지 확인
     User user = userRepository.findById(postDto.getAdminId())
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
-
-    // 그룹장이 중복된 시간으로 게시글을 등록하지는 않았는지 체크(완료처리되지 않은 건이 동일 일자에 있다면)
-//    LocalDateTime startDateTime = postDto.getStartDateTime();
-//    LocalDateTime endDateTime = startDateTime.plusDays(1);
-//    boolean dupYn = postRepository.existsByAdminIdAndStartDateTimeAndArriveYnFalse(
-//        postDto.getAdminId(), startDateTime, endDateTime);
-
 
     // 그룹장은 진행중인 건이 러닝 내역이 있다면 완료 혹은 삭제 후에 추가 가능하도록 변경.
     boolean dupYn = postRepository.existsByAdminIdAndArriveYnFalse(postDto.getAdminId());
@@ -86,17 +80,21 @@ public class PostService {
         .paceMin(postDto.getPaceMin())
         .paceSec(postDto.getPaceSec())
         .path(postDto.getPath())
-        .lat(postDto.getSwLatlng())
-        .lng(postDto.getNeLatlng())
+        .lat(postDto.getCenterLat())
+        .lng(postDto.getCenterLng())
         .departureYn(false)
         .arriveYn(false)
         .build());
+
+    log.info("[RUNNERS LOG] register postId: {} ", post.getPostId());
 
     // 그룹 사용자에 그룹장을 추가한다.
     UserPost userPost = new UserPost();
     userPost.setId(new UserPostPK(user.getId(), post.getPostId()));
     userPost.setValid_yn(true);
     userPostRepository.save(userPost);
+
+    log.info("[RUNNERS LOG] register userPost userId : {} ", user.getId());
 
     return post;
 
@@ -120,10 +118,9 @@ public class PostService {
       post.setPaceMin(postDto.getPaceMin());
       post.setPaceSec(postDto.getPaceSec());
       post.setPath(postDto.getPath());
-//      post.setDepartureYn(postDto.getDepartureYn());
-//      post.setArriveYn(postDto.getArriveYn());
       postRepository.save(post);
 
+      log.info("[RUNNERS LOG] modify postId : {} ", post.getPostId());
       return post;
 
     } else {
@@ -132,6 +129,11 @@ public class PostService {
   }
 
   public void deletePost(Long postId) throws Exception {
+    /*
+     * 그룹장 권한의 방삭제 기능 처리시에는 실제 db delete 처리한다.
+     * (그룹 방 생성만 하고 아무것도 하지 않은 상태일 때만 삭제 가능하기 때문)
+     * userPost 관련 로직은 delete 처리 하지 않고 유효여부 false 처리 한다.
+     */
     Optional<Post> postItem = postRepository.findById(postId);
     if (postItem.isPresent()) {
       Post post = postItem.get();
@@ -139,7 +141,17 @@ public class PostService {
       // 변경 가능 상태인지 체크
       validatePost(post);
 
+      // 1. userPost 데이터 삭제 (post에 참여한 모든 사용자 - 최소한 그룹장은 등록되어 있음 )
+      int delCnt = userPostRepository.deleteById_PostId(postId);
+      if (delCnt < 0) {
+        throw new RunnersMapException(ErrorCode.NOT_FOUND_USER);
+      }
+      log.info("[RUNNERS LOG] delete userPost Cnt : {} ", delCnt);
+
+      // 2. Post 데이터 삭제
       postRepository.deleteById(post.getPostId());
+
+      log.info("[RUNNERS LOG] delete postId : {} ", postId);
 
     } else {
       throw new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA);
@@ -151,7 +163,10 @@ public class PostService {
     if (!post.getAdminId().equals(post.getAdminId())) {
       throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
     }
-
+    // 시작 전의 러닝 글에 대해서만 가능
+    if (post.getDepartureYn()) {
+      throw new RunnersMapException(ErrorCode.ALREADY_START_POST_DATA);
+    }
     // 완료 전의 러닝 글에 대해서만 가능
     if (post.getArriveYn()) {
       throw new RunnersMapException(ErrorCode.ALREADY_COMPLETE_POST_DATA);

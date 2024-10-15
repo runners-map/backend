@@ -111,7 +111,7 @@ public class UserPostService {
     postRepository.save(post);
 
     // 모집글에 참여중인 사용자 조회 (유효한 사용자)
-    List<UserPost> userList = userPostRepository.findAllByPostId(postId);
+    List<UserPost> userList = userPostRepository.findAllByPostIdAndValidYn(postId);
     if(userList == null || userList.size() <= 0) {
       throw new RunnersMapException(ErrorCode.NOT_FOUND_USER);
     }
