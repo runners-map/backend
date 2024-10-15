@@ -5,11 +5,11 @@ import com.service.runnersmap.dto.PostInDto;
 import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.service.PostService;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,9 +32,10 @@ public class PostController {
   /*
    * 러닝모집글/인증샷 내역 조회
    * - 지도에 표시될 데이터를 표시한다.
+   * - 페이징 처리 추가
    */
   @GetMapping("/map-posts")
-  public ResponseEntity<List<PostDto>> searchMapPost(
+  public ResponseEntity<Page<PostDto>> searchMapPost(
       @RequestParam(value = "centerLat") Double centerLat,
       @RequestParam(value = "centerLng") Double centerLng,
       @RequestParam(value = "gender", required = false) String gender,
@@ -44,24 +45,32 @@ public class PostController {
       @RequestParam(value = "distanceEnd", required = false) Long distanceEnd,
       @RequestParam(value = "startDate", required = false) LocalDate startDate,
       @RequestParam(value = "startTime", required = false) String startTime,
-      @RequestParam(value = "limitMemberCnt", required = false) Integer limitMemberCnt
+      @RequestParam(value = "limitMemberCnt", required = false) Integer limitMemberCnt,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "20") int size
   ) throws Exception {
 
-    PostInDto inDto = new PostInDto();
-    inDto.setLat(centerLat);
-    inDto.setLng(centerLng);
-    inDto.setGender(gender);
-    inDto.setPaceMinStart(paceMinStart);
-    inDto.setPaceMinEnd(paceMinEnd);
-    inDto.setDistanceStart(distanceStart);
-    inDto.setDistanceEnd(distanceEnd);
-    inDto.setStartDate(startDate);
-    inDto.setStartTime(startTime);
-    inDto.setLimitMemberCnt(limitMemberCnt);
+    PostInDto inDto = PostInDto.builder()
+        .lat(centerLat)
+        .lng(centerLng)
+        .gender(gender)
+        .paceMinStart(paceMinStart)
+        .paceMinEnd(paceMinEnd)
+        .distanceStart(distanceStart)
+        .distanceEnd(distanceEnd)
+        .startDate(startDate)
+        .startTime(startTime)
+        .limitMemberCnt(limitMemberCnt)
+        .build();
 
-    return ResponseEntity.ok(
-        postService.searchPost(inDto).stream().map(p -> PostDto.fromEntity(p)).collect(Collectors.toList())
-    );
+    Page<PostDto> posts = postService.searchPost(inDto, PageRequest.of(page, size))
+        .map(PostDto::fromEntity);
+
+    if (posts.isEmpty()) {
+      return ResponseEntity.noContent().build();
+    } else {
+      return ResponseEntity.ok(posts);
+    }
   }
 
   /*
@@ -72,7 +81,7 @@ public class PostController {
       @RequestParam(value = "postId") Long postId
   ) throws Exception {
     Optional<Post> post = postService.searchDetailPost(postId);
-    if(post.isPresent()) {
+    if (post.isPresent()) {
       PostDto postDto = PostDto.fromEntity(post.get());
       return ResponseEntity.ok(postDto);
     } else {
