@@ -34,7 +34,7 @@ public class CommentService {
    * 댓글 작성 - 해당 모집글에 참여한 사용자만 작성 가능
    */
   @Transactional
-  public void createComment(Long postId, Long userId, CommentDto commentDto) {
+  public CommentDto createComment(Long postId, Long userId, CommentDto commentDto) {
 
     log.info("댓글 작성 요청");
 
@@ -44,7 +44,7 @@ public class CommentService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    UserPost userPost = userPostRepository.findById(new UserPostPK(user, post))
+    UserPost userPost = userPostRepository.findById(new UserPostPK(userId, postId))
         .orElseThrow(() -> {
           log.error("사용자가 해당 모집글에 포함되어 있지 않습니다 - 게시글 ID: {}, 사용자 ID: {}", postId, userId);
           return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
@@ -55,15 +55,21 @@ public class CommentService {
     }
 
     // 댓글 작성
-    Comment comment = Comment.builder()
+    Comment createdComment = Comment.builder()
         .post(post)
         .user(user)
         .content(commentDto.getContent())
         .createdAt(LocalDateTime.now())
         .updatedAt(LocalDateTime.now())
         .build();
-    commentRepository.save(comment);
-    log.info("댓글 작성 완료: {}", comment.getContent());
+    commentRepository.save(createdComment);
+    log.info("댓글 작성 완료: {}", createdComment.getContent());
+
+    return new CommentDto(
+        createdComment.getUser().getNickname(),
+        createdComment.getContent(),
+        createdComment.getCreatedAt()
+    );
   }
 
   /**
@@ -79,7 +85,7 @@ public class CommentService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    UserPost userPost = userPostRepository.findById(new UserPostPK(user, post))
+    UserPost userPost = userPostRepository.findById(new UserPostPK(userId, postId))
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
 
     if (!userPost.getValid_yn()) {
@@ -98,7 +104,7 @@ public class CommentService {
    * 댓글 수정 댓글 작성자만 수정 가능
    */
   @Transactional
-  public void updateComment(Long commentId, Long userId, CommentDto commentDto) {
+  public CommentDto updateComment(Long commentId, Long userId, CommentDto commentDto) {
     log.info("댓글 수정 요청 - 댓글 ID: {}, 사용자 ID: {}", commentId, userId);
 
     Comment comment = commentRepository.findById(commentId)
@@ -113,8 +119,13 @@ public class CommentService {
 
     comment.setContent(commentDto.getContent());
     comment.setUpdatedAt(LocalDateTime.now());
-    commentRepository.save(comment);
+    Comment updatedComment = commentRepository.save(comment);
     log.info("댓글 수정 완료");
+    return new CommentDto(
+        updatedComment.getUser().getNickname(),
+        updatedComment.getContent(),
+        updatedComment.getUpdatedAt()
+    );
   }
 
   /**
