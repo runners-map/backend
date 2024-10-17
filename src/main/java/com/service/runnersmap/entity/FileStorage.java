@@ -27,11 +27,11 @@ public class FileStorage {
 
   @OneToOne
   @JoinColumn(name = "users_id")
-  private User user;
+  private User user;  // 업로더
 
   @OneToOne
   @JoinColumn(name = "post_id")
-  private Post post;
+  private Post post;  // 인증샷과 연관된 모집글
 
   private String originalFileName;  // 원래 파일명
   private String storedFileName;  // 저장된 파일명

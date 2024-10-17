@@ -140,5 +140,11 @@ public class FileStorageService {
     uploadedFile.setFileUrl(
         Paths.get(uploadDir).resolve(uploadedFile.getStoredFileName()).toString());
     return uploadedFile;
+
+    // S3에서 기존파일 삭제
+    // 새 파일 S3에 저장
+    // S3에 파일 업로드
+    // 업로드된 파일정보 저장
+    // DB에 저장
   }
 }
