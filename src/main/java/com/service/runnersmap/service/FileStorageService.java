@@ -39,7 +39,23 @@ public class FileStorageService {
 
     String originalFileName = file.getOriginalFilename();
     String storedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+
+    // 이건 추후 삭제
     Path path = Paths.get(uploadDir).resolve(storedFileName);
+
+//    ObjectMetadata metadata = new ObkectMetadata();
+//    metadata.setContentLength(file.getSize());
+//    try (InputStream inputStream = file.getInputStream()) {
+//    amazonS3.putObject(new PutObjectRequest(bucketName, storedFileName, inputStream, metadata));
+//    --------------------------------------------------------
+//    try (InputStream inputStream = file.getInputStream()) {
+//      // S3에 파일 업로드
+//      s3Client.putObject(PutObjectRequest.builder())
+//          .bucket(bucketName)
+//          .key(storedFileName)
+//          .build(),
+//      RequestBody.fromInputStream(inputStream, file.getSize());
+//    }
 
     try (InputStream inputStream = file.getInputStream()) {
       Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
@@ -49,10 +65,14 @@ public class FileStorageService {
       throw e;
     }
 
+    // String fileUrl = String.format("~~~", bucketName, s3Client.region().id(), storedFileName);
+    // String fileUrl = amazonS3.getUrl(bucketName, storedFileName).toString();
+
     FileStorage fileStorage = FileStorage.builder()
         .originalFileName(originalFileName)
         .storedFileName(storedFileName)
         .fileUrl(path.toString())
+        // fileUrl(fileUrl)
         .fileSize(file.getSize())
         .user(user)
         .post(post)
@@ -75,6 +95,13 @@ public class FileStorageService {
     if (existingProfile != null) {
       // 기존 파일 삭제
       Files.deleteIfExists(Paths.get(uploadDir).resolve(existingProfile.getStoredFileName()));
+//      // 기존 파일을 S3에서 삭제
+//      s3Client.deleteObject(DeleteObjectRequest.builder()
+//          .bucket(bucketName)
+//          .key(existingProfile.getStoredFileName())
+//          .build());
+//    --------------------------------------------------
+//      amazonS3.deleteObject(bucketName, existingProfile.getStoredFileName());
       // DB에서 레코드 삭제
       filesStorageRepository.delete(existingProfile);
       log.info("기존 프로필 사진 삭제 완료: {}", existingProfile.getStoredFileName());
@@ -84,7 +111,8 @@ public class FileStorageService {
 
     // 새 파일 저장
     FileStorage uploadedFile = saveFile(file, user, null);
-    uploadedFile.setFileUrl(Paths.get(uploadDir).resolve(uploadedFile.getStoredFileName()).toString());
+    uploadedFile.setFileUrl(
+        Paths.get(uploadDir).resolve(uploadedFile.getStoredFileName()).toString());
     return uploadedFile;
   }
 
@@ -93,16 +121,24 @@ public class FileStorageService {
    * 인증샷 업로드
    */
   @Transactional
-  public void uploadAfterRunPic(MultipartFile file, Post post) throws IOException {
+  public FileStorage uploadAfterRunPic(MultipartFile file, Post post) throws IOException {
     if (file.isEmpty()) {
       throw new IOException("파일이 존재하지 않습니다.");
     }
 
     FileStorage existingAfterRunPic = filesStorageRepository.findByPost(post);
+    // 기존 사진 삭제
     if (existingAfterRunPic != null) {
       Files.deleteIfExists(Paths.get(uploadDir).resolve(existingAfterRunPic.getStoredFileName()));
       filesStorageRepository.delete(existingAfterRunPic);
+      log.info("기존 인증샷 사진 삭제 완료 : {}", existingAfterRunPic.getStoredFileName());
+      // 즉시 반영
+      filesStorageRepository.flush();
     }
-    saveFile(file, null, post);
+    // 새 파일 저장
+    FileStorage uploadedFile = saveFile(file, null, post);
+    uploadedFile.setFileUrl(
+        Paths.get(uploadDir).resolve(uploadedFile.getStoredFileName()).toString());
+    return uploadedFile;
   }
 }
