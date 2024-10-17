@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,7 @@ public class ChatController {
 
   // 메시지 전송하는 메서드
   @MessageMapping(value = "/message")
+  @SendTo("/sub/chat/room/{chatRoomId}")
   public void sendMessage(ChatMessageDto message) {
     try {
       chatService.saveAndBroadcastMessage(message);
