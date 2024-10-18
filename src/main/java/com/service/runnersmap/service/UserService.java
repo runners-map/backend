@@ -1,7 +1,7 @@
 package com.service.runnersmap.service;
 
 import com.service.runnersmap.component.JwtTokenProvider;
-import com.service.runnersmap.dto.TokenResponse;
+import com.service.runnersmap.dto.LoginResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;
 import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
@@ -64,7 +64,7 @@ public class UserService {
   /**
    * 로그인 이메일, 비밀번호 입력
    */
-  public TokenResponse login(LoginDto loginDto) {
+  public LoginResponse login(LoginDto loginDto) {
     log.info("로그인 요청: {} ", loginDto.getEmail())
     ;
     User user = userRepository.findByEmail(loginDto.getEmail())
@@ -86,7 +86,32 @@ public class UserService {
     refreshTokenRepository.save(refreshTokenEntity);
 
     log.info("로그인 성공");
-    return new TokenResponse(accessToken, refreshToken);
+    return new LoginResponse(accessToken, refreshToken,
+        user.getId(), user.getNickname(), user.getLastPosition());
+  }
+
+  /**
+   * 리프레시 토큰으로 엑세스 토큰 갱신
+   */
+  public LoginResponse refreshAccessToken(String refreshToken) {
+    log.info("리프레시 토큰으로 엑세스 토큰 갱신 요청");
+
+    RefreshToken storedRefreshToken = refreshTokenRepository.findByToken(refreshToken)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+    if (jwtTokenProvider.isTokenExpired(refreshToken)) {
+      throw new RunnersMapException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    String email = storedRefreshToken.getUser().getEmail();
+
+    String newAccessToken = jwtTokenProvider.generateAccessToken(email);
+    log.info("새로운 엑세스토큰 생성 완료");
+
+    return new LoginResponse(newAccessToken, refreshToken,
+        storedRefreshToken.getUser().getId(),
+        storedRefreshToken.getUser().getNickname(),
+        storedRefreshToken.getUser().getLastPosition());
   }
 
   /**

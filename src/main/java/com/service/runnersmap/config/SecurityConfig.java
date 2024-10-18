@@ -32,7 +32,9 @@ public class SecurityConfig {
             .requestMatchers(
                 "/ws/chat/**",
                 "/api/user/sign-up",
-                "/api/user/login"
+                "/api/user/login",
+                "/api/user/refresh"
+
             ).permitAll()
             .anyRequest().authenticated()
         )
