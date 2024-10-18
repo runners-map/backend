@@ -22,20 +22,20 @@ public class ChatController {
 
   private final ChatService chatService;
 
-//  // 채팅방에 처음 접속할 때 입장 알림 메시지 전송하는 메서드
-//  @MessageMapping(value = "/enter")
-//  public void handleUserEnter(
-//      @Payload ChatMessageDto chatMessageDto) { // payload에 채팅방 id가 포함되어있으므로  {chatRoomId} 불필요
-//    log.info("사용자 {}가 채팅방 {}에 입장했습니다.", chatMessageDto.getSenderId(), chatMessageDto.getChatRoomId());
-//    chatService.handleUserEnter(chatMessageDto);
-//  }
-//
-//  // 퇴장할 때 퇴장 알림 메시지 전송하는 메서드
-//  @MessageMapping(value = "/exit")
-//  public void handleUserExit(@Payload ChatMessageDto chatMessageDto) {
-//    log.info("사용자 {}가 채팅방 {}에서 퇴장했습니다.", chatMessageDto.getSenderId(), chatMessageDto.getChatRoomId());
-//    chatService.handleUserExit(chatMessageDto);
-//  }
+  // 채팅방에 처음 접속할 때 입장 알림 메시지 전송하는 메서드
+  @MessageMapping(value = "/enter")
+  public void handleUserEnter(
+      @Payload ChatMessageDto chatMessageDto) { // payload에 채팅방 id가 포함되어있으므로  {chatRoomId} 불필요
+    log.info("사용자 {}가 채팅방 {}에 입장했습니다.", chatMessageDto.getSenderId(), chatMessageDto.getChatRoomId());
+    chatService.handleUserEnter(chatMessageDto);
+  }
+
+  // 퇴장할 때 퇴장 알림 메시지 전송하는 메서드
+  @MessageMapping(value = "/exit")
+  public void handleUserExit(@Payload ChatMessageDto chatMessageDto) {
+    log.info("사용자 {}가 채팅방 {}에서 퇴장했습니다.", chatMessageDto.getSenderId(), chatMessageDto.getChatRoomId());
+    chatService.handleUserExit(chatMessageDto);
+  }
 
   // 메시지 전송하는 메서드
   @MessageMapping(value = "/message")

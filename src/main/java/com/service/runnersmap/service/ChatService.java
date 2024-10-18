@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -30,17 +31,18 @@ public class ChatService {
   private final SimpMessagingTemplate template;
 
 
-//  /**
-//   * 사용자가 채팅방에 들어왔을 때 입장 알림 메시지 전송
-//   */
-//  public void handleUserEnter(ChatMessageDto chatMessageDto) {
-//
-//    User sender = userRepository.findById(chatMessageDto.getSenderId())
-//        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
-//
-//    ChatRoom chatRoom = chatRoomRepository.findByPost_PostId(chatMessageDto.getChatRoomId())
-//        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방"));
-//
+  /**
+   * 사용자가 채팅방에 들어왔을 때 입장 알림 메시지 전송
+   */
+  @Transactional
+  public void handleUserEnter(ChatMessageDto chatMessageDto) {
+
+    User sender = userRepository.findById(chatMessageDto.getSenderId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDto.getChatRoomId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방"));
+
 //    Post post = chatRoom.getPost();
 //
 //    // UserPost를 조회해서 사용자의 채팅방 참여상태 확인
@@ -63,32 +65,33 @@ public class ChatService {
 //    }
 //    userPostRepository.save(userPost);
 //
-//    String enterMessage = sender.getNickname() + "님이 채팅방에 입장하셨습니다.";
-//    chatMessageDto = ChatMessageDto.builder()
-//        .message(enterMessage)
-//        .build();
-//    template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), chatMessageDto);
+    String enterMessage = sender.getNickname() + "님이 채팅방에 입장하셨습니다.";
+    chatMessageDto = ChatMessageDto.builder()
+        .senderNickname(sender.getNickname())
+        .message(enterMessage)
+        .build();
+    template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), chatMessageDto);
+
+    // 이전 메시지들 불러오기
+    List<ChatMessageDto> previousMessages = getMessages(chatRoom.getId());
+    for (ChatMessageDto previousMessage : previousMessages) {
+      template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), previousMessage);
+    }
+
+  }
 //
-//    // 이전 메시지들 불러오기
-//    List<ChatMessageDto> previousMessages = getMessages(chatRoom.getId());
-//    for (ChatMessageDto previousMessage : previousMessages) {
-//      template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), previousMessage);
-//    }
 //
-//  }
-//
-//
-//  /**
-//   * 사용자가 퇴장시 퇴장 알림 메시지 전송 메서드
-//   */
-//  public void handleUserExit(ChatMessageDto chatMessageDto) {
-//
-//    User sender = userRepository.findById(chatMessageDto.getSenderId())
-//        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
-//
-//    ChatRoom chatRoom = chatRoomRepository.findByPost_PostId(chatMessageDto.getChatRoomId())
-//        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방"));
-//
+  /**
+   * 사용자가 퇴장시 퇴장 알림 메시지 전송 메서드
+   */
+  public void handleUserExit(ChatMessageDto chatMessageDto) {
+
+    User sender = userRepository.findById(chatMessageDto.getSenderId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDto.getChatRoomId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 채팅방"));
+
 //    Post post = chatRoom.getPost();
 //
 //    // UserPost에서 valid_yn을 false로 변경
@@ -98,13 +101,13 @@ public class ChatService {
 //    userPost.setValid_yn(false);
 //    userPostRepository.save(userPost);
 //
-//    String exitMessage = sender.getNickname() + "님이 채팅방을 나갔습니다.";
-//    chatMessageDto.builder()
-//        .message(exitMessage)
-//        .build();
-//
-//    template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), chatMessageDto);
-//  }
+    String exitMessage = sender.getNickname() + "님이 채팅방을 나갔습니다.";
+    chatMessageDto.builder()
+        .message(exitMessage)
+        .build();
+
+    template.convertAndSend("/sub/chat/room/" + chatRoom.getId(), chatMessageDto);
+  }
 
 
   /**
