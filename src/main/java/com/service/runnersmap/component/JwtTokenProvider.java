@@ -33,7 +33,7 @@ public class JwtTokenProvider {
         .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRED_TIME)) // 만료시간
         .signWith(algorithm, secretKey)
         .compact(); // 토큰을 문자열로 변환하여 반환
-    log.info("생성된 Access Token : {}", token);
+    log.info("엑세스 토큰 : {}", token);
     return token;
   }
 

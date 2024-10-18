@@ -1,11 +1,12 @@
 package com.service.runnersmap.controller;
 
-import com.service.runnersmap.dto.TokenResponse;
+import com.service.runnersmap.dto.LoginResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;
 import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
+import com.service.runnersmap.entity.RefreshToken;
 import com.service.runnersmap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,8 +38,8 @@ public class UserController {
 
   // 로그인 API
   @PostMapping("/login")
-  public ResponseEntity<TokenResponse> login(@RequestBody LoginDto loginDto) {
-    TokenResponse tokenResponse = userService.login(loginDto);
+  public ResponseEntity<LoginResponse> login(@RequestBody LoginDto loginDto) {
+    LoginResponse tokenResponse = userService.login(loginDto);
     return ResponseEntity.ok(tokenResponse); // 200 OK
   }
 
@@ -85,6 +86,16 @@ public class UserController {
     String email = userDetails.getUsername();
     userService.updateAccount(email, accountUpdateDto);
     return ResponseEntity.ok().build(); // 200 OK
+
+  }
+
+
+  // 리프레시 토큰으로 엑세스 토큰 갱신
+  @PostMapping("/refresh")
+  public ResponseEntity<LoginResponse> refreshToken(@RequestBody LoginResponse refreshToken) {
+
+    LoginResponse newTokenResponse = userService.refreshAccessToken(refreshToken.getRefreshToken());
+    return ResponseEntity.ok(newTokenResponse);
 
   }
 }
