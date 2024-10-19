@@ -43,17 +43,11 @@ public class CommentService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    UserPost up = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA));
-    UserPost userPost = userPostRepository.findById(up.getUserPostId())
+    UserPost userPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
         .orElseThrow(() -> {
           log.error("사용자가 해당 모집글에 포함되어 있지 않습니다 - 게시글 ID: {}, 사용자 ID: {}", postId, userId);
           return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
         });
-
-    if (!userPost.getValidYn()) {
-      throw new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
-    }
 
     // 댓글 작성
     Comment createdComment = Comment.builder()
@@ -89,14 +83,8 @@ public class CommentService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    UserPost up = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA));
-    UserPost userPost = userPostRepository.findById(up.getUserPostId())
+    UserPost userPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
-
-    if (!userPost.getValidYn()) {
-      throw new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
-    }
 
     return commentRepository.findByPost(post, pageable)
         .map(comment -> new CommentDto(
