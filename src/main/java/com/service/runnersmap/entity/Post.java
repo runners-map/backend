@@ -33,11 +33,10 @@ public class Post {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "post_id")
   private Long postId; //메이트모집글ID
 
-
-  // 직렬화 시 오류 발생 하여 EAGER 설정으로 User 데이터도 전체 가져오도록 처리
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "users_id")
   private User admin;
 

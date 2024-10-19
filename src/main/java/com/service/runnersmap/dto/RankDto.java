@@ -1,6 +1,7 @@
 package com.service.runnersmap.dto;
 
 import com.service.runnersmap.entity.Rank;
+import java.time.Duration;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,7 +17,7 @@ public class RankDto {
 
   private double totalDistance;
 
-  private String totalTime;
+  private Duration totalTime;
 
 
   public static RankDto fromEntity(Rank rank) {
