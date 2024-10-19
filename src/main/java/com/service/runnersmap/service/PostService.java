@@ -5,7 +5,6 @@ import com.service.runnersmap.dto.PostInDto;
 import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.entity.User;
 import com.service.runnersmap.entity.UserPost;
-import com.service.runnersmap.entity.UserPostPK;
 import com.service.runnersmap.exception.RunnersMapException;
 import com.service.runnersmap.repository.PostRepository;
 import com.service.runnersmap.repository.UserPostRepository;
@@ -62,7 +61,7 @@ public class PostService {
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
     // 그룹장은 진행중인 건이 러닝 내역이 있다면 완료 혹은 삭제 후에 추가 가능하도록 변경.
-    boolean dupYn = postRepository.existsByAdminIdAndArriveYnFalse(postDto.getAdminId());
+    boolean dupYn = postRepository.existsByAdminIdAndArriveYnIsFalse(postDto.getAdminId());
     if (dupYn) {
       throw new RunnersMapException(ErrorCode.ALREADY_EXISTS_POST_DATA);
     }
@@ -90,8 +89,12 @@ public class PostService {
 
     // 그룹 사용자에 그룹장을 추가한다.
     UserPost userPost = new UserPost();
-    userPost.setId(new UserPostPK(user.getId(), post.getPostId()));
-    userPost.setValid_yn(true);
+    userPost.setPost(post);
+    userPost.setUser(user);
+    userPost.setValidYn(true);
+    userPost.setTotalDistance(postDto.getDistance());
+    userPost.setYear(postDto.getStartDateTime().getYear());
+    userPost.setMonth(postDto.getStartDateTime().getMonthValue());
     userPostRepository.save(userPost);
 
     log.info("[RUNNERS LOG] register userPost userId : {} ", user.getId());
@@ -142,7 +145,7 @@ public class PostService {
       validatePost(post);
 
       // 1. userPost 데이터 삭제 (post에 참여한 모든 사용자 - 최소한 그룹장은 등록되어 있음 )
-      int delCnt = userPostRepository.deleteById_PostId(postId);
+      int delCnt = userPostRepository.deleteByPost_PostId(postId);
       if (delCnt < 0) {
         throw new RunnersMapException(ErrorCode.NOT_FOUND_USER);
       }

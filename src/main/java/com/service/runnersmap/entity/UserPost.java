@@ -1,10 +1,12 @@
 package com.service.runnersmap.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,7 +22,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "userPost")
+@Table(name = "user_post")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -29,32 +31,35 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class UserPost {
 
-  @EmbeddedId
-  private UserPostPK id; // 복합 키(postId, userId)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "user_post_id")
+  private Long userPostId;
 
-  // 테이블간 관계를 지정하기 위해 추가
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "users_id", insertable = false, updatable = false)
+  @JoinColumn(name = "users_id")
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "posts_id", insertable = false, updatable = false)
+  @JoinColumn(name = "post_id")
   private Post post;
 
-  @Column(nullable = true)
-  private Boolean valid_yn; // 유효여부(탈퇴, 강퇴여부)
+  @Column(nullable = false)
+  private Boolean validYn; // 유효여부(탈퇴, 강퇴여부)
 
-  @Column(nullable = true)
   private Double totalDistance; // 달린 거리
 
-  @Column(nullable = true)
   private LocalDateTime actualStartTime; //(실제)출발시간
 
-  @Column(nullable = true)
   private LocalDateTime actualEndTime; //(실제)도착시간
 
-  @Column(nullable = true)
   private Duration runningDuration; // 소요시간
+
+  @Column(nullable = false)
+  private Integer year;
+
+  @Column(nullable = false)
+  private Integer month;
 
   @CreatedDate
   private LocalDateTime createdDateTime;

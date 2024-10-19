@@ -64,19 +64,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   );
 
 
-  @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
-      "FROM Post p " +
-      "WHERE p.admin.id = :adminId " +
-      "AND (p.arriveYn IS NULL OR p.arriveYn = false)")
-  boolean existsByAdminIdAndArriveYnFalse(
-      @Param("adminId") Long adminId);
+  boolean existsByAdminIdAndArriveYnIsFalse(Long adminId);
 
-
-  @Query(" SELECT p " +
-      "FROM UserPost up " +
-      "JOIN up.post p " +
-      "WHERE up.id.userId = :userId " +
-      "AND up.valid_yn = true " +
-      "ORDER BY p.startDateTime DESC")
-  List<Post> findAllByUserId(@Param("userId") Long userId);
 }
