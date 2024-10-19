@@ -91,16 +91,5 @@ public class UserController {
     return ResponseEntity.ok().build(); // 200 OK
 
   }
-
-
-  // 프로필사진 등록/수정 API
-  @PutMapping("/my-page/photo")
-  public ResponseEntity<Void> updateProfileImage(
-      @AuthenticationPrincipal UserDetails userDetails,
-      @RequestParam("profileImage") MultipartFile profileImage) throws IOException {
-
-    String email = userDetails.getUsername();
-    userService.updateProfileImage(email, profileImage);
-    return ResponseEntity.ok().build();
-  }
+  
 }
