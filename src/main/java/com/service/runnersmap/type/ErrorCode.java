@@ -41,6 +41,8 @@ public enum ErrorCode {
 
   ALREADY_EXISTS_NICKNAME("이미 사용중인 닉네임입니다."),
 
+  NOT_FOUND_USER_POST_DATA("모집글에 참가중인 정보를 조회할 수 없습니다."),
+
 
   // 댓글 관련 에러코드
   NOT_FOUND_COMMENT("댓글이 존재하지 않습니다."),

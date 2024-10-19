@@ -200,7 +200,7 @@ public class UserPostService {
     Long userPostId = null;
 
     UserPost up = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA));
 
     userPostId = up.getUserPostId();
     return userPostId;

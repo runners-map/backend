@@ -5,7 +5,6 @@ import com.service.runnersmap.entity.Comment;
 import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.entity.User;
 import com.service.runnersmap.entity.UserPost;
-import com.service.runnersmap.entity.UserPostPK;
 import com.service.runnersmap.exception.RunnersMapException;
 import com.service.runnersmap.repository.CommentRepository;
 import com.service.runnersmap.repository.PostRepository;
@@ -44,13 +43,15 @@ public class CommentService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    UserPost userPost = userPostRepository.findById(new UserPostPK(userId, postId))
+    UserPost up = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA));
+    UserPost userPost = userPostRepository.findById(up.getUserPostId())
         .orElseThrow(() -> {
           log.error("사용자가 해당 모집글에 포함되어 있지 않습니다 - 게시글 ID: {}, 사용자 ID: {}", postId, userId);
           return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
         });
 
-    if (!userPost.getValid_yn()) {
+    if (!userPost.getValidYn()) {
       throw new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
     }
 
@@ -88,10 +89,12 @@ public class CommentService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    UserPost userPost = userPostRepository.findById(new UserPostPK(userId, postId))
+    UserPost up = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA));
+    UserPost userPost = userPostRepository.findById(up.getUserPostId())
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
 
-    if (!userPost.getValid_yn()) {
+    if (!userPost.getValidYn()) {
       throw new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
     }
 
