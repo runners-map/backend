@@ -35,11 +35,11 @@ public class User {
   // 마지막 위치
   private String lastPosition;
 
+  // 프로필 사진 URL
+  private String profileImageUrl;
+
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-
-  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-  private FileStorage profileImage;
 
 }
 
