@@ -41,12 +41,5 @@ public class User {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-// Oauth 관련 컬럼
-//  @Column(name = "provider")
-//  private String provider;
-//
-//  @Column(name = "provider_id")
-//  private String providerId;
-
 }
 

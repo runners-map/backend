@@ -32,6 +32,8 @@ public enum ErrorCode {
 
   NOT_FOUND_PARTICIPATE_USER("해당 이용자는 이미 모집글에 참여하지 않는 이용자 입니다."),
 
+  NOT_FINISHED_RUNNING("러닝이 완료된 후에만 인증샷을 업로드할 수 있습니다."),
+
   // 유저 관련 에러코드
   INVALID_REFRESH_TOKEN("유효하지 않은 토큰입니다."),
 
@@ -47,7 +49,10 @@ public enum ErrorCode {
   // 댓글 관련 에러코드
   NOT_FOUND_COMMENT("댓글이 존재하지 않습니다."),
 
-  WRITER_ONLY_ACCESS_COMMENT_DATA("댓글 작성자만 수정/삭제가 가능합니다.")
+  WRITER_ONLY_ACCESS_COMMENT_DATA("댓글 작성자만 수정/삭제가 가능합니다."),
+
+  // 파일 관련 에러코드
+  NOT_FOUND_FILE_DATA("파일을 찾을 수 없습니다.")
   ;
 
   private final String description;

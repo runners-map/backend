@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -85,4 +86,8 @@ public class Post {
   private LocalDateTime createdDateTime;
   @LastModifiedDate
   private LocalDateTime updatedDateTime;
+
+  @OneToOne(mappedBy = "post")
+  private FileStorage afterRunPicture;  // 인증샷
+
 }

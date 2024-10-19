@@ -7,12 +7,14 @@ import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
+import com.service.runnersmap.entity.FileStorage;
 import com.service.runnersmap.entity.RefreshToken;
 import com.service.runnersmap.entity.User;
 import com.service.runnersmap.exception.RunnersMapException;
 import com.service.runnersmap.repository.RefreshTokenRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final FileStorageService fileStorageService;
 
   /**
    * 회원가입 이메일, 비밀번호, 닉네임, 성별 입력
@@ -160,21 +164,27 @@ public class UserService {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
+    String profileImageUrl = "";
+    if (user.getProfileImage() != null) {
+      profileImageUrl = user.getProfileImage().getStoredFileName();
+      // profileImageUrl = "https://" + 버킷이름 + ".s3." + " 리전" + ".amazonaws.com/" + user.getProfileImage().getStoredFileName();
+    }
+
     return AccountInfoDto.builder()
         .nickname(user.getNickname())
         .email(user.getEmail())
         .gender(user.getGender())
+        .profileImage(profileImageUrl) // 만약 등록된 프사가 없는 경우, 빈 문자열 반환
         .build();
   }
 
   /**
-   * 회원정보 수정 (닉네임, 비밀번호, 프로필사진 등록/수정)
+   * 회원정보 수정 (닉네임, 비밀번호)
    */
   @Transactional
   public void updateAccount(String email, AccountUpdateDto accountUpdateDto) {
 
     log.info("회원정보 수정 요청 : {}", email);
-    // 프로필 사진 등록/수정을 위한 MultipartFile profileImage는 추후 구현예정
 
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
@@ -195,13 +205,25 @@ public class UserService {
       user.setPassword(passwordEncoder.encode(accountUpdateDto.getNewPassword()));
     }
 
-    // 프로필사진 등록/수정
-//    if (profileImage != null && !profileImage.isEmpty()) {
-//      String profileImageUrl = fileStorageService.storeFile(profileImage); // 프로필 사진 저장
-//      user.setProfileImageUrl(profileImageUrl);
-//    }
     user.setUpdatedAt(LocalDateTime.now());
     userRepository.save(user);
     log.info("회원정보 수정 완료");
+  }
+
+  /**
+   * 프로필 등록/수정
+   */
+  @Transactional
+  public void updateProfileImage(String email, MultipartFile file) throws IOException {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
+
+    // 프로필사진 업로드
+    FileStorage uploadedFile = fileStorageService.uploadProfileImage(file, user);
+
+    // 기존 프사가 있는 경우, 삭제 후 새 이미지로 대체
+    user.setProfileImage(uploadedFile);
+    user.setUpdatedAt(LocalDateTime.now());
+    userRepository.save(user);
   }
 }
