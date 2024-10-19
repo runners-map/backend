@@ -165,10 +165,10 @@ public class UserService {
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
     String profileImageUrl = "";
-    if (user.getProfileImage() != null) {
-      profileImageUrl = user.getProfileImage().getStoredFileName();
-      // profileImageUrl = "https://" + 버킷이름 + ".s3." + " 리전" + ".amazonaws.com/" + user.getProfileImage().getStoredFileName();
-    }
+//    if (user.getProfileImage() != null) {
+//      profileImageUrl = user.getProfileImage().getStoredFileName();
+//      // profileImageUrl = "https://" + 버킷이름 + ".s3." + " 리전" + ".amazonaws.com/" + user.getProfileImage().getStoredFileName();
+//    }
 
     return AccountInfoDto.builder()
         .nickname(user.getNickname())
@@ -222,7 +222,7 @@ public class UserService {
     FileStorage uploadedFile = fileStorageService.uploadProfileImage(file, user);
 
     // 기존 프사가 있는 경우, 삭제 후 새 이미지로 대체
-    user.setProfileImage(uploadedFile);
+    //user.setProfileImage(uploadedFile);
     user.setUpdatedAt(LocalDateTime.now());
     userRepository.save(user);
   }
