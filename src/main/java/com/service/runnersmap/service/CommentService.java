@@ -61,6 +61,7 @@ public class CommentService {
         .content(commentDto.getContent())
         .createdAt(LocalDateTime.now())
         .updatedAt(LocalDateTime.now())
+        .isEdited(false)
         .build();
     commentRepository.save(createdComment);
     log.info("댓글 작성 완료: {}", createdComment.getContent());
@@ -68,7 +69,9 @@ public class CommentService {
     return new CommentDto(
         createdComment.getUser().getNickname(),
         createdComment.getContent(),
-        createdComment.getCreatedAt()
+        createdComment.getCreatedAt(),
+        createdComment.getUser().getProfileImageUrl(),
+        createdComment.getIsEdited()
     );
   }
 
@@ -96,7 +99,9 @@ public class CommentService {
         .map(comment -> new CommentDto(
             comment.getUser().getNickname(),
             comment.getContent(),
-            comment.getCreatedAt()
+            comment.getCreatedAt(),
+            comment.getUser().getProfileImageUrl(),
+            comment.getIsEdited()
         ));
   }
 
@@ -119,12 +124,16 @@ public class CommentService {
 
     comment.setContent(commentDto.getContent());
     comment.setUpdatedAt(LocalDateTime.now());
+    comment.setIsEdited(true);
     Comment updatedComment = commentRepository.save(comment);
     log.info("댓글 수정 완료");
+
     return new CommentDto(
         updatedComment.getUser().getNickname(),
         updatedComment.getContent(),
-        updatedComment.getUpdatedAt()
+        updatedComment.getUpdatedAt(),
+        updatedComment.getUser().getProfileImageUrl(),
+        updatedComment.getIsEdited()
     );
   }
 

@@ -30,8 +30,11 @@ public class SecurityConfig {
         // HTTP 요청에 대한 권한
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
+                "/ws/chat/**",
                 "/api/user/sign-up",
-                "/api/user/login"
+                "/api/user/login",
+                "/api/user/refresh"
+
             ).permitAll()
             .anyRequest().authenticated()
         )

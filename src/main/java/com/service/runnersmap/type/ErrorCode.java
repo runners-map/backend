@@ -35,6 +35,8 @@ public enum ErrorCode {
   NOT_FINISHED_RUNNING("러닝이 완료된 후에만 인증샷을 업로드할 수 있습니다."),
 
   // 유저 관련 에러코드
+  INVALID_REFRESH_TOKEN("유효하지 않은 토큰입니다."),
+
   ALREADY_EXISTS_USER("이미 회원가입 된 이메일입니다."),
 
   NOT_VALID_PASSWORD("비밀번호를 다시 확인해주세요"),

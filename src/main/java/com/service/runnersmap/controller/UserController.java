@@ -1,6 +1,6 @@
 package com.service.runnersmap.controller;
 
-import com.service.runnersmap.dto.TokenResponse;
+import com.service.runnersmap.dto.LoginResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;
 import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
@@ -14,8 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,8 +37,8 @@ public class UserController {
 
   // 로그인 API
   @PostMapping("/login")
-  public ResponseEntity<TokenResponse> login(@RequestBody LoginDto loginDto) {
-    TokenResponse tokenResponse = userService.login(loginDto);
+  public ResponseEntity<LoginResponse> login(@RequestBody LoginDto loginDto) {
+    LoginResponse tokenResponse = userService.login(loginDto);
     return ResponseEntity.ok(tokenResponse); // 200 OK
   }
 
@@ -77,7 +77,7 @@ public class UserController {
 
 
   // 회원정보 수정 API
-  @PatchMapping("/my-page")
+  @PutMapping("/my-page")
   public ResponseEntity<Void> updateAccount(
       @AuthenticationPrincipal UserDetails userDetails,
       @RequestBody AccountUpdateDto accountUpdateDto) {
@@ -88,4 +88,13 @@ public class UserController {
 
   }
 
+
+  // 리프레시 토큰으로 엑세스 토큰 갱신
+  @PostMapping("/refresh")
+  public ResponseEntity<LoginResponse> refreshToken(@RequestBody LoginResponse refreshToken) {
+
+    LoginResponse newTokenResponse = userService.refreshAccessToken(refreshToken.getRefreshToken());
+    return ResponseEntity.ok(newTokenResponse);
+
+  }
 }
