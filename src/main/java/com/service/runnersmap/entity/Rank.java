@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,7 +44,7 @@ public class Rank {
 
   private double totalDistance; //누적거리
 
-  private String totalTime; //누적시간
+  private Duration totalTime; //누적시간
 
   @CreatedDate
   private LocalDateTime createdDateTime;

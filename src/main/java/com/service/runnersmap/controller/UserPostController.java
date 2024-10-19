@@ -1,5 +1,6 @@
 package com.service.runnersmap.controller;
 
+import com.service.runnersmap.dto.PostDto;
 import com.service.runnersmap.dto.UserPostDto;
 import com.service.runnersmap.dto.UserPostSearchDto;
 import com.service.runnersmap.entity.Post;
@@ -29,7 +30,7 @@ public class UserPostController {
    * 러닝모집글 리스트 조회 (사용자별 러닝참여 리스트 조회)
    */
   @GetMapping("/list")
-  public ResponseEntity<List<Post>> listParticipatePost(
+  public ResponseEntity<List<PostDto>> listParticipatePost(
       @RequestParam(value = "userId") Long userId
   ) throws Exception {
     return ResponseEntity.ok(
@@ -41,13 +42,13 @@ public class UserPostController {
    * 러닝 참가하기
    */
   @PostMapping("/participate")
-  public ResponseEntity<UserPost> participate(
+  public ResponseEntity<Void> participate(
       @RequestParam(value = "postId") Long postId,
       @RequestParam(value = "userId") Long userId
   ) throws Exception {
-    return ResponseEntity.ok(
-        userPostService.participate(postId, userId)
-    );
+    userPostService.participate(postId, userId);
+    return ResponseEntity.noContent().build();
+
   }
 
   /*
