@@ -40,4 +40,5 @@ public class Comment {
 
   private LocalDateTime updatedAt;
 
+  private Boolean isEdited;
 }
