@@ -33,22 +33,22 @@ public class AfterRunService {
    */
   public void createAfterRunPhoto(Long postId, User admin, MultipartFile file) throws IOException {
 
-    // 모집글 유무 확인
-    Post post = postRepository.findById(postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
-
-    // 그룹장 권한 체크
-    if (!post.getAdmin().getId().equals(admin.getId())) {
-      throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
-    }
-
-    // 도착 여부 확인
-    if (!post.getArriveYn()) {
-      throw new RunnersMapException(ErrorCode.NOT_FINISHED_RUNNING);
-    }
-
-    // 인증샷 업로드
-    fileStorageService.uploadAfterRunPic(file, post);
+//    // 모집글 유무 확인
+//    Post post = postRepository.findById(postId)
+//        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
+//
+//    // 그룹장 권한 체크
+//    if (!post.getAdmin().getId().equals(admin.getId())) {
+//      throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
+//    }
+//
+//    // 도착 여부 확인
+//    if (!post.getArriveYn()) {
+//      throw new RunnersMapException(ErrorCode.NOT_FINISHED_RUNNING);
+//    }
+//
+//    // 인증샷 업로드
+//    fileStorageService.uploadAfterRunPic(file, post);
 
   }
 
