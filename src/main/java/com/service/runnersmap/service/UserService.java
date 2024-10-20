@@ -164,17 +164,11 @@ public class UserService {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    String profileImageUrl = "";
-//    if (user.getProfileImage() != null) {
-//      profileImageUrl = user.getProfileImage().getStoredFileName();
-//      // profileImageUrl = "https://" + 버킷이름 + ".s3." + " 리전" + ".amazonaws.com/" + user.getProfileImage().getStoredFileName();
-//    }
-
     return AccountInfoDto.builder()
         .nickname(user.getNickname())
         .email(user.getEmail())
         .gender(user.getGender())
-        .profileImage(profileImageUrl) // 만약 등록된 프사가 없는 경우, 빈 문자열 반환
+        .profileImage(user.getProfileImageUrl())
         .build();
   }
 
@@ -214,16 +208,18 @@ public class UserService {
    * 프로필 등록/수정
    */
   @Transactional
-  public void updateProfileImage(String email, MultipartFile file) throws IOException {
+  public String updateProfileImage(String email, MultipartFile file) throws IOException {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
     // 프로필사진 업로드
-    FileStorage uploadedFile = fileStorageService.uploadProfileImage(file, user);
+    String profileImageUrl = fileStorageService.uploadFile(file);
 
     // 기존 프사가 있는 경우, 삭제 후 새 이미지로 대체
-    //user.setProfileImage(uploadedFile);
+    user.setProfileImageUrl(profileImageUrl);
     user.setUpdatedAt(LocalDateTime.now());
     userRepository.save(user);
+
+    return profileImageUrl;
   }
 }

@@ -7,6 +7,7 @@ import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
 import com.service.runnersmap.service.UserService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/user")
@@ -97,4 +100,20 @@ public class UserController {
     return ResponseEntity.ok(newTokenResponse);
 
   }
+
+  @PostMapping("/profile-image")
+  public ResponseEntity<String> uploadProfileImage(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @RequestParam("file") MultipartFile file) {
+
+    String email = userDetails.getUsername();
+    try {
+      String imageUrl = userService.updateProfileImage(email,file);
+      return ResponseEntity.ok(imageUrl);  // 업로드된 프로필 이미지 URL 반환
+    } catch (IOException e) {
+      return ResponseEntity.badRequest().body("프로필 사진 업로드 중 오류가 발생했습니다: " + e.getMessage());
+    }
+  }
+
+
 }
