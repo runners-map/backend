@@ -90,4 +90,6 @@ public class Post {
   @OneToOne(mappedBy = "post")
   private FileStorage afterRunPicture;  // 인증샷
 
+  private String afterRunPictureUrl;
+
 }
