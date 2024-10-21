@@ -7,7 +7,6 @@ import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
-import com.service.runnersmap.entity.FileStorage;
 import com.service.runnersmap.entity.RefreshToken;
 import com.service.runnersmap.entity.User;
 import com.service.runnersmap.exception.RunnersMapException;
@@ -35,6 +34,7 @@ public class UserService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final FileStorageService fileStorageService;
 
+
   /**
    * 회원가입 이메일, 비밀번호, 닉네임, 성별 입력
    */
@@ -59,6 +59,7 @@ public class UserService {
         .password(passwordEncoder.encode(signUpDto.getPassword()))
         .nickname(signUpDto.getNickname())
         .gender(signUpDto.getGender())
+        .profileImageUrl("")
         .createdAt(LocalDateTime.now())
         .build();
     userRepository.save(user);
@@ -91,7 +92,8 @@ public class UserService {
 
     log.info("로그인 성공");
     return new LoginResponse(accessToken, refreshToken,
-        user.getId(), user.getNickname(), user.getLastPosition());
+        user.getId(), user.getNickname(), user.getEmail(), user.getGender(), user.getLastPosition(),
+        user.getProfileImageUrl());
   }
 
   /**
@@ -115,7 +117,11 @@ public class UserService {
     return new LoginResponse(newAccessToken, refreshToken,
         storedRefreshToken.getUser().getId(),
         storedRefreshToken.getUser().getNickname(),
-        storedRefreshToken.getUser().getLastPosition());
+        storedRefreshToken.getUser().getEmail(),
+        storedRefreshToken.getUser().getGender(),
+        storedRefreshToken.getUser().getLastPosition(),
+        storedRefreshToken.getUser().getProfileImageUrl()
+    );
   }
 
   /**
@@ -168,7 +174,7 @@ public class UserService {
         .nickname(user.getNickname())
         .email(user.getEmail())
         .gender(user.getGender())
-        .profileImage(user.getProfileImageUrl())
+        .profileImageUrl(user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "")
         .build();
   }
 
@@ -204,22 +210,69 @@ public class UserService {
     log.info("회원정보 수정 완료");
   }
 
+
   /**
    * 프로필 등록/수정
    */
   @Transactional
-  public String updateProfileImage(String email, MultipartFile file) throws IOException {
+  public String updateProfileImage(String email, MultipartFile profileImage) throws IOException {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
-    // 프로필사진 업로드
-    String profileImageUrl = fileStorageService.uploadFile(file);
+    // 파일 크기 제한 체크 (예: 5MB)
+    long maxFileSize = 5 * 1024 * 1024; // 5MB
+    if (profileImage.getSize() > maxFileSize) {
+      throw new IOException("파일 크기는 5MB를 초과할 수 없습니다.");
+    }
 
     // 기존 프사가 있는 경우, 삭제 후 새 이미지로 대체
-    user.setProfileImageUrl(profileImageUrl);
+    if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+      String existingProfileImageUrl = user.getProfileImageUrl();
+      String existingProfileImageName = existingProfileImageUrl.substring(
+          existingProfileImageUrl.lastIndexOf("/") + 1);
+      try {
+        fileStorageService.deleteFile(existingProfileImageName);
+      } catch (IOException e) {
+        log.error("기존 프로필 사진 삭제 실패 {}", e.getMessage());
+        throw new IOException("기존 프로필 사진 삭제 중 문제 발생");
+      }
+    }
+
+    // 새 프로필사진 업로드
+    String newProfileImageUrl;
+
+    try {
+      newProfileImageUrl = fileStorageService.uploadFile(profileImage);
+    } catch (IOException e) {
+      log.error("새 프로필 사진 업로드 실패 : {}", e.getMessage());
+      throw new IOException("새 프로필 사진 업로드 중 문제 발생");
+    }
+
+    user.setProfileImageUrl(newProfileImageUrl);
     user.setUpdatedAt(LocalDateTime.now());
     userRepository.save(user);
+    log.info("프로필 이미지 등록/수정 완료");
 
-    return profileImageUrl;
+    return newProfileImageUrl;
   }
+
+
+  /**
+   * 프로필 사진 삭제
+   */
+  public void deleteProfileImage(String email) throws IOException {
+
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
+
+    if (user.getProfileImageUrl() != null) {
+      fileStorageService.deleteFile(user.getProfileImageUrl());
+      user.setProfileImageUrl("");
+      user.setUpdatedAt(LocalDateTime.now());
+      userRepository.save(user);
+      log.info("프로필 이미지가 삭제되었습니다.");
+    }
+
+  }
+
 }

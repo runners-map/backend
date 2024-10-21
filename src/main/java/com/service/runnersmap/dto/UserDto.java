@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 public class UserDto {
 
@@ -37,6 +36,7 @@ public class UserDto {
   @AllArgsConstructor
   @Builder
   public static class AccountDeleteDto {
+
     private String password;
   }
 
@@ -46,10 +46,11 @@ public class UserDto {
   @AllArgsConstructor
   @Builder
   public static class AccountInfoDto {
+
     private String nickname;
     private String email;
     private String gender;
-    private String profileImage;
+    private String profileImageUrl;
   }
 
   @Getter
@@ -58,18 +59,9 @@ public class UserDto {
   @AllArgsConstructor
   @Builder
   public static class AccountUpdateDto {
+
     private String newNickname;
     private String newPassword;
     private String newConfirmPassword;
   }
-
-  @Getter
-  @Setter
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
-  public static class ProfilePhotoDto {
-    private MultipartFile profileImage;
-  }
-
 }

@@ -101,19 +101,26 @@ public class UserController {
 
   }
 
-  @PostMapping("/profile-image")
+
+  // 프로필 사진 등록 API
+  @PutMapping("/profile-image")
   public ResponseEntity<String> uploadProfileImage(
       @AuthenticationPrincipal UserDetails userDetails,
-      @RequestParam("file") MultipartFile file) {
+      @RequestParam("file") MultipartFile file) throws IOException {
 
     String email = userDetails.getUsername();
-    try {
-      String imageUrl = userService.updateProfileImage(email,file);
-      return ResponseEntity.ok(imageUrl);  // 업로드된 프로필 이미지 URL 반환
-    } catch (IOException e) {
-      return ResponseEntity.badRequest().body("프로필 사진 업로드 중 오류가 발생했습니다: " + e.getMessage());
-    }
+    String imageUrl = userService.updateProfileImage(email, file);
+    return ResponseEntity.ok(imageUrl);  // 업로드된 프로필 이미지 URL 반환
   }
 
+
+  // 프로필 사진 삭제 API
+  @DeleteMapping("/profile-image")
+  public ResponseEntity<Void> deleteProfileImage(
+      @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+    String email = userDetails.getUsername();
+    userService.deleteProfileImage(email);
+    return ResponseEntity.ok().build();
+  }
 
 }

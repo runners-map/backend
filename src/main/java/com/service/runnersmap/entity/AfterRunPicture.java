@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -19,25 +20,23 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class FileStorage {
-
+public class AfterRunPicture {
+// 인증샷 엔티티
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "users_id")
-  private User user;  // 업로더
+  private User user;  // 업로더 (한 사용자는 여러 모집글에 대한 인증샷 업로드 가능)
 
   @OneToOne
   @JoinColumn(name = "post_id")
-  private Post post;  // 인증샷과 연관된 모집글
+  private Post post;  // 인증샷과 연관된 모집글 (한 모집글에는 하나의 인증샷만)
 
-  private String originalFileName;  // 원래 파일명
-  private String storedFileName;  // 저장된 파일명
-  private String fileUrl;  // 파일 저장 경로
-  private Long fileSize;  // 파일 크기(바이트)
+  private String afterRunPictureUrl;
+  private LocalDateTime createdAt;
 
-  private Integer likeCount = 0;  // 좋아요 수
+  private Integer likeCount = 0;  // 좋아요 수, 기본값 0
 
 }

@@ -24,8 +24,8 @@ public class Likes {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "fileStorage_id")
-  private FileStorage fileStorage;
+  @JoinColumn(name = "afterRunPicture_id")
+  private AfterRunPicture afterRunPicture;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "users_id")

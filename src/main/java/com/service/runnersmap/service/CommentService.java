@@ -65,7 +65,7 @@ public class CommentService {
         createdComment.getUser().getNickname(),
         createdComment.getContent(),
         createdComment.getCreatedAt(),
-        //createdComment.getUser().getProfileImageUrl(),
+        createdComment.getUser().getProfileImageUrl(),
         createdComment.getIsEdited()
     );
   }
@@ -91,7 +91,7 @@ public class CommentService {
             comment.getUser().getNickname(),
             comment.getContent(),
             comment.getCreatedAt(),
-            //comment.getUser().getProfileImageUrl(),
+            comment.getUser().getProfileImageUrl(),
             comment.getIsEdited()
         ));
   }
@@ -123,7 +123,7 @@ public class CommentService {
         updatedComment.getUser().getNickname(),
         updatedComment.getContent(),
         updatedComment.getUpdatedAt(),
-        //updatedComment.getUser().getProfileImageUrl(),
+        updatedComment.getUser().getProfileImageUrl(),
         updatedComment.getIsEdited()
     );
   }
