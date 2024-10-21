@@ -1,6 +1,5 @@
 package com.service.runnersmap.service;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.service.runnersmap.component.JwtTokenProvider;
 import com.service.runnersmap.dto.LoginResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;

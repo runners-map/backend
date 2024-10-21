@@ -103,14 +103,14 @@ public class UserController {
 
 
   // 프로필 사진 등록 API
-  @PostMapping("/profile-image")
+  @PutMapping("/profile-image")
   public ResponseEntity<String> uploadProfileImage(
       @AuthenticationPrincipal UserDetails userDetails,
       @RequestParam("file") MultipartFile file) throws IOException {
 
     String email = userDetails.getUsername();
-      String imageUrl = userService.updateProfileImage(email,file);
-      return ResponseEntity.ok(imageUrl);  // 업로드된 프로필 이미지 URL 반환
+    String imageUrl = userService.updateProfileImage(email, file);
+    return ResponseEntity.ok(imageUrl);  // 업로드된 프로필 이미지 URL 반환
   }
 
 
