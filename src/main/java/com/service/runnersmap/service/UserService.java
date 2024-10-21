@@ -92,7 +92,8 @@ public class UserService {
 
     log.info("로그인 성공");
     return new LoginResponse(accessToken, refreshToken,
-        user.getId(), user.getNickname(), user.getLastPosition());
+        user.getId(), user.getNickname(), user.getEmail(), user.getGender(), user.getLastPosition(),
+        user.getProfileImageUrl());
   }
 
   /**
@@ -116,7 +117,11 @@ public class UserService {
     return new LoginResponse(newAccessToken, refreshToken,
         storedRefreshToken.getUser().getId(),
         storedRefreshToken.getUser().getNickname(),
-        storedRefreshToken.getUser().getLastPosition());
+        storedRefreshToken.getUser().getEmail(),
+        storedRefreshToken.getUser().getGender(),
+        storedRefreshToken.getUser().getLastPosition(),
+        storedRefreshToken.getUser().getProfileImageUrl()
+    );
   }
 
   /**
