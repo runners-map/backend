@@ -59,6 +59,7 @@ public class UserService {
         .password(passwordEncoder.encode(signUpDto.getPassword()))
         .nickname(signUpDto.getNickname())
         .gender(signUpDto.getGender())
+        .profileImageUrl("")
         .createdAt(LocalDateTime.now())
         .build();
     userRepository.save(user);
