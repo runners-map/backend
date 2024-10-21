@@ -87,9 +87,5 @@ public class Post {
   @LastModifiedDate
   private LocalDateTime updatedDateTime;
 
-  @OneToOne(mappedBy = "post")
-  private FileStorage afterRunPicture;  // 인증샷
-
-  private String afterRunPictureUrl;
 
 }
