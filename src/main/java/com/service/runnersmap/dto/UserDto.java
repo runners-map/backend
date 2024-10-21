@@ -49,7 +49,7 @@ public class UserDto {
     private String nickname;
     private String email;
     private String gender;
-    private String profileImage;
+    private String profileImageUrl;
   }
 
   @Getter
@@ -62,14 +62,4 @@ public class UserDto {
     private String newPassword;
     private String newConfirmPassword;
   }
-
-  @Getter
-  @Setter
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
-  public static class ProfilePhotoDto {
-    private MultipartFile profileImage;
-  }
-
 }

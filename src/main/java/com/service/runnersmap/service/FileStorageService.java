@@ -1,26 +1,15 @@
 package com.service.runnersmap.service;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.service.runnersmap.entity.FileStorage;
-import com.service.runnersmap.entity.Post;
-import com.service.runnersmap.entity.User;
-import com.service.runnersmap.repository.FilesStorageRepository;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -36,8 +25,6 @@ public class FileStorageService {
   @Value("${cloud.aws.region.static}")
   private String region;
 
-
-  private final FilesStorageRepository filesStorageRepository;
 
   /**
    * S3에 이미지 업로드
@@ -71,6 +58,24 @@ public class FileStorageService {
 
   private String getImageUrl(String fileName) {
     return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, fileName);
+  }
+
+
+  /**
+   * S3에서 이미지 삭제
+   */
+  public void deleteFile(String fileUrl) throws IOException {
+    if (fileUrl != null && !fileUrl.isEmpty()) {
+      String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
+      try {
+        amazonS3.deleteObject(bucket, fileName);
+        log.info("S3에서 파일 삭제 성공");
+      } catch (AmazonServiceException e) {
+        log.error("S3에서 파일 삭제 중 오류 발생 {}", e.getMessage());
+        throw new RuntimeException("S3 파일 삭제 중 문제 발생");
+      }
+    }
   }
 
 
