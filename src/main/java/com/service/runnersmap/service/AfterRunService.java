@@ -16,10 +16,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AfterRunService {
@@ -36,6 +38,7 @@ public class AfterRunService {
   @Transactional
   public AfterRunPictureDto createAfterRunPicture(Long postId, Long userId, MultipartFile file)
       throws IOException {
+    log.info("인증샷 업로드 시도 요청");
 
     // 모집글 유무 확인
     Post post = postRepository.findById(postId)
@@ -43,16 +46,19 @@ public class AfterRunService {
 
     // 그룹장 권한 체크
     if (!post.getAdmin().getId().equals(userId)) {
+      log.error("그룹장만 인증샷을 업로드할 수 있습니다.");
       throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
     }
 
     // 도착 여부 확인
     if (!post.getArriveYn()) {
+      log.error("러닝이 아직 종료되지 않았습니다.");
       throw new RunnersMapException(ErrorCode.NOT_FINISHED_RUNNING);
     }
 
     // S3에 인증샷 업로드 -> url 받아옴
     String afterRunPictureUrl = fileStorageService.uploadFile(file);
+    log.info("S3에 인증샷 업로드 완료: {}", afterRunPictureUrl);
 
     AfterRunPicture afterRunPicture = AfterRunPicture.builder()
         .user(post.getAdmin())
@@ -61,7 +67,7 @@ public class AfterRunService {
         .createdAt(LocalDateTime.now())
         .build();
 
-    AfterRunPicture savedAfterRunPicture =  afterRunPictureRepository.save(afterRunPicture);
+    AfterRunPicture savedAfterRunPicture = afterRunPictureRepository.save(afterRunPicture);
     return AfterRunPictureDto.builder()
         .fileId(savedAfterRunPicture.getId())
         .afterRunPictureUrl(savedAfterRunPicture.getAfterRunPictureUrl())
@@ -73,7 +79,7 @@ public class AfterRunService {
    * 인증샷 조회 - 모든 이용자가 조회 가능 좋아요 수도 반환
    */
   public AfterRunPictureDto viewAfterRunPicture(Long postId) {
-
+    log.info("인증샷 조회 요청 : 모집글Id = {}", postId);
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
 
@@ -100,10 +106,9 @@ public class AfterRunService {
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_FILE_DATA));
 
     try {
-    // 이미 좋아요 눌렀는지 확인
-    Optional<Likes> alreadyLiked = likesRepository.findByAfterRunPictureAndUser(afterRunPicture,
-        user);
-    // 있으면 취소, 없으면 추가
+      // 이미 좋아요 눌렀는지 확인
+      Optional<Likes> alreadyLiked = likesRepository.findByAfterRunPictureAndUser(afterRunPicture, user);
+      // 있으면 취소, 없으면 추가
       if (alreadyLiked.isPresent()) {
         likesRepository.delete(alreadyLiked.get());
         afterRunPicture.setLikeCount(afterRunPicture.getLikeCount() - 1); // 좋아요 수 감소
@@ -117,6 +122,7 @@ public class AfterRunService {
       }
       afterRunPictureRepository.save(afterRunPicture);
     } catch (OptimisticLockException e) {
+      log.error("OptimisticLockException 동시성 문제 발생", e);
       throw new RunnersMapException(ErrorCode.CONCURRENCY_CONTROL);
     }
   }
