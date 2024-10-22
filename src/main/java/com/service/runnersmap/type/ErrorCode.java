@@ -52,7 +52,9 @@ public enum ErrorCode {
   WRITER_ONLY_ACCESS_COMMENT_DATA("댓글 작성자만 수정/삭제가 가능합니다."),
 
   // 파일 관련 에러코드
-  NOT_FOUND_FILE_DATA("파일을 찾을 수 없습니다.")
+  NOT_FOUND_FILE_DATA("파일을 찾을 수 없습니다."),
+
+  CONCURRENCY_CONTROL("처리중인 요청이 너무 많습니다. 다시 시도해주세요")
   ;
 
   private final String description;

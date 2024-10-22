@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,5 +39,8 @@ public class AfterRunPicture {
   private LocalDateTime createdAt;
 
   private Integer likeCount = 0;  // 좋아요 수, 기본값 0
+
+  @Version
+  private Long version;
 
 }
