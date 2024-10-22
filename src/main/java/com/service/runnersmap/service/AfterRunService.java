@@ -63,7 +63,9 @@ public class AfterRunService {
 
     AfterRunPicture savedAfterRunPicture =  afterRunPictureRepository.save(afterRunPicture);
     return AfterRunPictureDto.builder()
+        .fileId(savedAfterRunPicture.getId())
         .afterRunPictureUrl(savedAfterRunPicture.getAfterRunPictureUrl())
+        .likeCount(0)
         .build();
   }
 
