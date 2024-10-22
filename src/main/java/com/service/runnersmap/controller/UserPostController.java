@@ -1,9 +1,7 @@
 package com.service.runnersmap.controller;
 
 import com.service.runnersmap.dto.PostDto;
-import com.service.runnersmap.dto.UserPostDto;
 import com.service.runnersmap.dto.UserPostSearchDto;
-import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.entity.UserPost;
 import com.service.runnersmap.service.UserPostService;
 import java.util.List;
@@ -13,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,9 +65,10 @@ public class UserPostController {
    */
   @PostMapping("/record/start")
   public ResponseEntity<Void> startRecord(
-      @RequestParam(value = "postId") Long postId
+      @RequestParam(value = "postId") Long postId,
+      @RequestParam(value = "userId") Long userId
   ) throws Exception {
-    userPostService.startRecord(postId);
+    userPostService.startRecord(postId, userId);
     return ResponseEntity.noContent().build();
   }
 
@@ -78,10 +76,12 @@ public class UserPostController {
    * 러닝기록 저장(완료버튼)
    */
   @PostMapping("/record/complete")
-  public ResponseEntity<UserPost> completeRecord(@RequestBody UserPostDto recordDto
+  public ResponseEntity<UserPost> completeRecord(
+      @RequestParam(value = "postId") Long postId,
+      @RequestParam(value = "userId") Long userId
   ) throws Exception {
     return ResponseEntity.ok(
-        userPostService.completeRecord(recordDto)
+        userPostService.completeRecord(postId, userId)
     );
   }
 
@@ -97,5 +97,18 @@ public class UserPostController {
     return ResponseEntity.ok(
         userPostService.searchRunningData(userId, year, month)
     );
+  }
+
+
+  /*
+   * 모집글 사용자 상태조회 [polling]
+   * - 사용자별 도착버튼 활성화 여부
+   */
+  @GetMapping("/userpost-state")
+  public ResponseEntity<String> userPostState(
+      @RequestParam(value = "postId") Long postId,
+      @RequestParam(value = "userId") Long userId
+  ) throws Exception {
+    return ResponseEntity.ok(userPostService.userPostState(postId, userId));
   }
 }

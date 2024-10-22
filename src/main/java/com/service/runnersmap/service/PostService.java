@@ -1,20 +1,24 @@
 package com.service.runnersmap.service;
 
+import com.service.runnersmap.dto.AfterRunPictureDto;
 import com.service.runnersmap.dto.PostDto;
 import com.service.runnersmap.dto.PostInDto;
+import com.service.runnersmap.entity.AfterRunPicture;
 import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.entity.User;
 import com.service.runnersmap.entity.UserPost;
 import com.service.runnersmap.exception.RunnersMapException;
+import com.service.runnersmap.repository.AfterRunPictureRepository;
+import com.service.runnersmap.repository.LikesRepository;
 import com.service.runnersmap.repository.PostRepository;
 import com.service.runnersmap.repository.UserPostRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +34,16 @@ public class PostService {
 
   private final UserRepository userRepository;
 
+  private final AfterRunService afterRunService;
+
+  private final AfterRunPictureRepository afterRunPictureRepository;
+
+  private final LikesRepository likesRepository;
 
   @Transactional(readOnly = true)
-  public Page<Post> searchPost(PostInDto inDto, Pageable pageable) throws Exception {
+  public List<PostDto> searchPost(PostInDto inDto) throws Exception {
 
-    return postRepository.findAllWithin2Km(
+    List<Post> posts = postRepository.findAllWithin2Km(
         inDto.getLat(),
         inDto.getLng(),
         inDto.getGender(),
@@ -44,9 +53,62 @@ public class PostService {
         inDto.getDistanceEnd(),
         inDto.getStartDate(),
         inDto.getStartTime(),
-        inDto.getLimitMemberCnt(),
-        pageable
+        inDto.getLimitMemberCnt()
     );
+
+    return posts.stream()
+        .map(post -> {
+              AfterRunPictureDto afterRunPictureDto = new AfterRunPictureDto();
+              if (post.getArriveYn()) {
+                // 완료된 postId 기준으로 인증샷 내역을 가져온다.
+                afterRunPictureDto = viewAfterRunPictureForPost(post);
+
+              }
+              return PostDto.builder()
+                  .postId(post.getPostId())
+                  .adminId(post.getAdmin().getId())
+                  .title(post.getTitle())
+                  .content(post.getContent())
+                  .limitMemberCnt(post.getLimitMemberCnt())
+                  .gender(post.getGender())
+                  .startDateTime(post.getStartDateTime())
+                  .startPosition(post.getStartPosition())
+                  .distance(post.getDistance())
+                  .paceMin(post.getPaceMin())
+                  .paceSec(post.getPaceSec())
+                  .path(post.getPath())
+                  .centerLat(post.getLat())
+                  .centerLng(post.getLng())
+                  .departureYn(post.getDepartureYn())
+                  .arriveYn(post.getArriveYn())
+                  .afterRunPictureUrl(afterRunPictureDto.getAfterRunPictureUrl())
+                  .likeCount(afterRunPictureDto.getLikeCount())
+                  .fileId(afterRunPictureDto.getFileId())
+                  .build();
+            }
+
+        ).filter(post -> !post.getArriveYn() || (post.getArriveYn()
+            && post.getAfterRunPictureUrl() != null))
+        .collect(Collectors.toList());
+
+
+  }
+
+  public AfterRunPictureDto viewAfterRunPictureForPost(Post post) {
+    log.info("인증샷 조회 요청 : 모집글Id = {}", post.getPostId());
+    Optional<AfterRunPicture> afterRunPicture = afterRunPictureRepository.findByPost(post);
+    if(afterRunPicture.isPresent()) {
+      AfterRunPicture picture = afterRunPicture.get();
+      int likeCount = likesRepository.countByAfterRunPicture(afterRunPicture.get());
+
+      return AfterRunPictureDto.builder()
+          .afterRunPictureUrl(picture.getAfterRunPictureUrl())
+          .likeCount(likeCount)
+          .fileId(picture.getId())
+          .build();
+    } else {
+      return AfterRunPictureDto.builder().build();
+    }
   }
 
   @Transactional(readOnly = true)

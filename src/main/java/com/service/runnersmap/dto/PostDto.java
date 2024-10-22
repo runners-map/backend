@@ -1,7 +1,11 @@
 package com.service.runnersmap.dto;
 
+import com.service.runnersmap.converter.PathListConverter;
+import com.service.runnersmap.entity.Path;
 import com.service.runnersmap.entity.Post;
+import jakarta.persistence.Convert;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,19 +39,27 @@ public class PostDto {
 
   private Integer paceSec;  //예상 페이스초
 
-  private String path; //경로
+  private List<Path> path; //경로
 
   private Boolean departureYn; //출발여부
 
   private Boolean arriveYn; //도착여부
 
-  private Long chatRoomId; //채팅방 ID
+//  private Long chatRoomId; //채팅방 ID
 
   private Double centerLat;
 
   private Double centerLng;
 
+  // 인증샷 관련 추가
+  private Long fileId; // 인증샷 Id
+
+  private String afterRunPictureUrl;  // 인증샷
+
+  private int likeCount;  // 좋아요 수
+
   public static PostDto fromEntity(Post post) {
+
     if (post == null) {
       System.out.println("Post object is null before calling fromEntity.");
     }

@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,52 +99,54 @@ public class UserPostService {
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
 
-    UserPost userPost = userPostRepository.findById(findUserPostId(userId, postId))
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_PARTICIPATE_USER));
+    Optional<UserPost> optionalUserPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId);
+    if (optionalUserPost.isPresent()) {
+      UserPost userPost = optionalUserPost.get();
+      // 실제달린 시간, 유효여부 false 처리
+      userPost.setActualEndTime(null);
+      userPost.setValidYn(false);
+      userPostRepository.save(userPost);
 
-    // 실제달린 시간, 유효여부 false 처리
-    userPost.setActualEndTime(null);
-    userPost.setValidYn(false);
-    userPostRepository.save(userPost);
+    } else {
+      throw new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA);
+    }
   }
 
 
   /*
-   * 러닝기록 - 시작 버튼 (그룹장권한 / 한번 호출로 모든 메이트들의 정보를 처리한다)
-   * 1. post 테이블에 출발 업데이트 처리한다.
+   * 러닝기록 - 시작 버튼
+   * 1. post 테이블에 출발 업데이트 처리한다. (1명이라도 출발했다면?)
    * 2. userPost 테이블에 실제 출발 시간을 업데이트 처리한다.
    */
-  public void startRecord(Long postId) throws Exception {
+  public void startRecord(Long postId, Long userId) throws Exception {
 
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
-    if (post.getDepartureYn()) {
-      throw new RunnersMapException(ErrorCode.ALREADY_DEPARTURE_POST_DATA);
-    }
 
     if (post.getArriveYn()) {
       throw new RunnersMapException(ErrorCode.ALREADY_COMPLETE_POST_DATA);
     }
 
-    // post 테이블 update
-    post.setDepartureYn(true); // 출발여부
-    postRepository.save(post);
-
-    // 모집글에 참여중인 사용자 조회 (유효한 사용자)
-    List<UserPost> userList = userPostRepository.findAllByPost_PostIdAndValidYnIsTrue(postId);
-    if (userList == null || userList.size() <= 0) {
-      throw new RunnersMapException(ErrorCode.NOT_FOUND_USER);
+    if (!post.getDepartureYn()) {
+      // 첫번째로 사용자가 출발 눌렀을 때 post 테이블 update
+      post.setDepartureYn(true); // 출발여부
+      postRepository.save(post); 
     }
 
-    // userPost 테이블 update
-    for (UserPost userItem : userList) {
-      UserPost userPost = userPostRepository.findById(
-              findUserPostId(userItem.getUser().getId(), postId))
-          .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
-
+    // 모집글에 참여중인 사용자 조회 (유효한 사용자)
+    Optional<UserPost> optionalUserPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId);
+    if (optionalUserPost.isPresent()) {
+      UserPost userPost = optionalUserPost.get();
+      if(userPost.getActualStartTime() != null) {
+        throw new RunnersMapException(ErrorCode.ALREADY_START_POST_DATA);
+      }
       userPost.setActualStartTime(LocalDateTime.now());
       userPostRepository.save(userPost);
     }
+    else {
+      throw new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA);
+    }
+
   }
 
   /*
@@ -151,61 +154,48 @@ public class UserPostService {
    * 1. post 테이블에 도착완료 업데이트 처리한다.
    * 2. userPost 테이블에 최종 도착 시간, 실제 달린 시간, 최종 달린 거리를 업데이트 처리 한다.
    */
-  public UserPost completeRecord(UserPostDto recordDto) throws Exception {
+  public UserPost completeRecord(Long postId, Long userId) throws Exception {
 
-    Post post = postRepository.findById(recordDto.getPostId())
+    Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
 
-    if (!post.getDepartureYn()) {
-      throw new RunnersMapException(ErrorCode.NOT_DEPARTURE_POST_DATA);
-    }
+//    if (!post.getDepartureYn()) {
+//      throw new RunnersMapException(ErrorCode.NOT_DEPARTURE_POST_DATA);
+//    }
+//    if (post.getArriveYn()) {
+//      throw new RunnersMapException(ErrorCode.ALREADY_COMPLETE_POST_DATA);
+//    }
 
-    if (post.getArriveYn()) {
-      throw new RunnersMapException(ErrorCode.ALREADY_COMPLETE_POST_DATA);
-    }
-
-    User user = userRepository.findById(recordDto.getUserId())
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
     // userPost 테이블 update
-    UserPost userPost = userPostRepository.findById(
-            findUserPostId(recordDto.getUserId(), recordDto.getPostId()))
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
-    if (!userPost.getValidYn()) {
-      throw new RunnersMapException(ErrorCode.NOT_VALID_USER);
+    Optional<UserPost> optionalUserPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId);
+    if (optionalUserPost.isPresent()) {
+      UserPost userPost = optionalUserPost.get();
+      if(userPost.getActualEndTime() != null) {
+        throw new RunnersMapException(ErrorCode.ALREADY_COMPLETE_POST_DATA);
+      }
+      userPost.setActualEndTime(LocalDateTime.now());
+      userPost.setRunningDuration(Duration.between(userPost.getActualStartTime(), LocalDateTime.now()));
+      userPostRepository.save(userPost);
+      // 미완료 러너 존재여부  -> true : 미도착, false : 도착
+      boolean existsIncompleteUser = userPostRepository.existsByPost_PostIdAndValidYnIsTrueAndActualEndTimeIsNull(
+          postId
+      );
+      if (!existsIncompleteUser) {
+        // 모든 사용자가 도착하면 도착 처리(post 테이블 도착처리)
+        // 만약에 사용자가 모두 도착하지 않았는데 비정상 종료처리가 되어야 한다면 그룹장이 모집글 방삭제를 해야한다.
+        post.setArriveYn(true); // 도착여부
+        postRepository.save(post);
+      }
+      return userPost;
+
+    } else {
+      throw new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA);
     }
-
-    userPost.setTotalDistance(post.getDistance());
-    userPost.setActualEndTime(LocalDateTime.now());
-    userPost.setRunningDuration(Duration.between(userPost.getActualStartTime(), LocalDateTime.now()));
-    userPostRepository.save(userPost);
-
-    // 미완료 러너 존재여부  -> true : 미도착, false : 도착
-    boolean existsIncompleteUser = userPostRepository.existsByPost_PostIdAndValidYnIsTrueAndActualEndTimeIsNull(
-        recordDto.getPostId()
-    );
-    if (!existsIncompleteUser) {
-      // 모든 사용자가 도착하면 도착 처리(post 테이블 도착처리)
-      // 만약에 사용자가 모두 도착하지 않았는데 비정상 종료처리가 되어야 한다면 그룹장이 모집글 방삭제를 해야한다.
-      post.setArriveYn(true); // 도착여부
-      postRepository.save(post);
-    }
-
-    return userPost;
   }
 
-
-  public Long findUserPostId(Long userId, Long postId) throws Exception {
-
-    Long userPostId = null;
-
-    UserPost up = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA));
-
-    userPostId = up.getUserPostId();
-    return userPostId;
-
-  }
 
   /*
    * 러닝기록 - 조회
@@ -262,4 +252,22 @@ public class UserPostService {
           (seconds % 60)); // 초
     }
   }
+
+  @Transactional(readOnly = true)
+  public String userPostState(Long postId, Long userId) {
+
+    Optional<UserPost> optionalUserPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId);
+    if (optionalUserPost.isPresent()) {
+
+      UserPost userPost = optionalUserPost.get();
+      if(!userPost.getValidYn()) {
+        throw new RunnersMapException(ErrorCode.NOT_VALID_USER);
+      }
+
+      return userPost.getActualStartTime() != null ? "COMPLETE" : "START";
+    } else {
+      throw new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA);
+    }
+  }
+
 }
