@@ -1,6 +1,8 @@
 package com.service.runnersmap.entity;
 
+import com.service.runnersmap.converter.PathListConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -9,9 +11,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -67,8 +69,10 @@ public class Post {
   @Column(nullable = false)
   private Integer paceSec;  //예상 페이스초
 
-  @Column(nullable = false)
-  private String path; //경로
+  @Convert(converter = PathListConverter.class)
+//  @Column(columnDefinition = "json")
+  @Column(columnDefinition = "LONGTEXT", nullable = false)
+  private List<Path> path;
 
   @Column(nullable = true)
   private Boolean departureYn; //출발여부

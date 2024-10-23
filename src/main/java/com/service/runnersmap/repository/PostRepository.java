@@ -3,8 +3,6 @@ package com.service.runnersmap.repository;
 import com.service.runnersmap.entity.Post;
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,28 +26,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
           "AND (:startTime IS NULL OR TIME_FORMAT(p.start_date_time, '%H%i') = :startTime) " +
           "AND (:limitMemberCnt IS NULL OR p.limit_member_cnt = :limitMemberCnt)" +
           "AND p.start_date_time >= CURRENT_TIMESTAMP " +
-          "AND p.departure_yn = false " +
-          "AND p.arrive_yn = false " +
-          "ORDER BY p.start_date_time ASC ",
-      countQuery =
-              "SELECT COUNT(*) "+
-              "FROM post p " +
-              "WHERE (6371 * acos(cos(radians(:lat)) * cos(radians(p.lat)) " +
-              "* cos(radians(p.lng) - radians(:lng)) " +
-              "+ sin(radians(:lat)) * sin(radians(p.lat)))) < 2 " +
-              "AND (:gender IS NULL OR p.gender = :gender) " +
-              "AND (:paceMinStart IS NULL OR (p.pace_min + p.pace_sec / 60) >= :paceMinStart) " +
-              "AND (:paceMinEnd IS NULL OR (p.pace_min + p.pace_sec / 60) <= :paceMinEnd) " +
-              "AND (:distanceStart IS NULL OR p.distance >= :distanceStart) " +
-              "AND (:distanceEnd IS NULL OR p.distance <= :distanceEnd) " +
-              "AND (:startDate IS NULL OR (p.start_date_time BETWEEN :startDate AND DATE_ADD(:startDate, INTERVAL 1 DAY))) "+
-              "AND (:startTime IS NULL OR TIME_FORMAT(p.start_date_time, '%H%i') = :startTime) " +
-              "AND (:limitMemberCnt IS NULL OR p.limit_member_cnt = :limitMemberCnt)" +
-              "AND p.start_date_time >= CURRENT_TIMESTAMP " +
-              "AND p.departure_yn = false " +
-              "AND p.arrive_yn = false ",
+          "ORDER BY p.start_date_time ASC " +
+          "LIMIT 20",
       nativeQuery = true)
-  Page<Post> findAllWithin2Km(
+  List<Post> findAllWithin2Km(
       @Param("lat") double lat,
       @Param("lng") double lng,
       @Param("gender") String gender,
@@ -59,8 +39,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
       @Param("distanceEnd") Long distanceEnd,
       @Param("startDate") LocalDate startDate,
       @Param("startTime") String startTime,
-      @Param("limitMemberCnt") Integer limitMemberCnt,
-      Pageable pageable
+      @Param("limitMemberCnt") Integer limitMemberCnt
   );
 
 
