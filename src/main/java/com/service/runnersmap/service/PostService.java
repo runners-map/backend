@@ -165,7 +165,7 @@ public class PostService {
 
   }
 
-  public Post modifyPost(PostDto postDto) throws Exception {
+  public void modifyPost(PostDto postDto) throws Exception {
     Optional<Post> postItem = postRepository.findById(postDto.getPostId());
     if (postItem.isPresent()) {
       Post post = postItem.get();
@@ -186,7 +186,6 @@ public class PostService {
       postRepository.save(post);
 
       log.info("[RUNNERS LOG] modify postId : {} ", post.getPostId());
-      return post;
 
     } else {
       throw new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA);

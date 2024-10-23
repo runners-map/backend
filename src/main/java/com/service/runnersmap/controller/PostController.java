@@ -98,9 +98,10 @@ public class PostController {
    * 러닝모집글 수정
    */
   @PutMapping
-  public ResponseEntity<Post> modifyPost(@RequestBody PostDto postDto
+  public ResponseEntity<Void> modifyPost(@RequestBody PostDto postDto
   ) throws Exception {
-    return ResponseEntity.ok(postService.modifyPost(postDto));
+    postService.modifyPost(postDto);
+    return ResponseEntity.ok(null);
   }
 
   /*
@@ -111,7 +112,7 @@ public class PostController {
       @RequestParam(value = "postId") Long postId
   ) throws Exception {
     postService.deletePost(postId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(null);
   }
 
 }

@@ -17,6 +17,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
           "WHERE (6371 * acos(cos(radians(:lat)) * cos(radians(p.lat)) " +
           "* cos(radians(p.lng) - radians(:lng)) " +
           "+ sin(radians(:lat)) * sin(radians(p.lat)))) < 2 " +
+          "AND ( (p.start_date_time >= CURRENT_TIMESTAMP AND p.arrive_yn = false) " +
+          "   OR ( p.start_date_time >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY) "
+                + " AND p.start_date_time <= CURRENT_TIMESTAMP "
+                + " AND p.arrive_yn = true) ) " +
           "AND (:gender IS NULL OR p.gender = :gender) " +
           "AND (:paceMinStart IS NULL OR (p.pace_min + p.pace_sec / 60) >= :paceMinStart) " +
           "AND (:paceMinEnd IS NULL OR (p.pace_min + p.pace_sec / 60) <= :paceMinEnd) " +
@@ -25,7 +29,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
           "AND (:startDate IS NULL OR (p.start_date_time BETWEEN :startDate AND DATE_ADD(:startDate, INTERVAL 1 DAY))) " +
           "AND (:startTime IS NULL OR TIME_FORMAT(p.start_date_time, '%H%i') = :startTime) " +
           "AND (:limitMemberCnt IS NULL OR p.limit_member_cnt = :limitMemberCnt)" +
-          "AND p.start_date_time >= CURRENT_TIMESTAMP " +
           "ORDER BY p.start_date_time ASC " +
           "LIMIT 20",
       nativeQuery = true)

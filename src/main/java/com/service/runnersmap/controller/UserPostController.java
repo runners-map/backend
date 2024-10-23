@@ -44,7 +44,7 @@ public class UserPostController {
       @RequestParam(value = "userId") Long userId
   ) throws Exception {
     userPostService.participate(postId, userId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(null);
 
   }
 
@@ -57,7 +57,7 @@ public class UserPostController {
       @RequestParam(value = "userId") Long userId
   ) throws Exception {
     userPostService.participateOut(postId, userId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(null);
   }
 
   /*
@@ -69,7 +69,7 @@ public class UserPostController {
       @RequestParam(value = "userId") Long userId
   ) throws Exception {
     userPostService.startRecord(postId, userId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(null);
   }
 
   /*
@@ -80,9 +80,8 @@ public class UserPostController {
       @RequestParam(value = "postId") Long postId,
       @RequestParam(value = "userId") Long userId
   ) throws Exception {
-    return ResponseEntity.ok(
-        userPostService.completeRecord(postId, userId)
-    );
+    userPostService.completeRecord(postId, userId);
+    return ResponseEntity.ok(null);
   }
 
   /*
