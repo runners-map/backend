@@ -101,7 +101,7 @@ public class PostController {
   public ResponseEntity<Void> modifyPost(@RequestBody PostDto postDto
   ) throws Exception {
     postService.modifyPost(postDto);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok().build();
   }
 
   /*
@@ -112,7 +112,7 @@ public class PostController {
       @RequestParam(value = "postId") Long postId
   ) throws Exception {
     postService.deletePost(postId);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok().build();
   }
 
 }
