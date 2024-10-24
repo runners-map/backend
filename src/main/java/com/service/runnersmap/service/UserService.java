@@ -15,6 +15,7 @@ import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +49,10 @@ public class UserService {
     // 비밀번호 확인 로직 추가
     if (!signUpDto.getPassword().equals(signUpDto.getConfirmPassword())) {
       throw new RunnersMapException(ErrorCode.NOT_VALID_PASSWORD);
+    }
+    // 비밀번호 복잡성 검증 추가
+    if (!isValidPassword(signUpDto.getPassword())) {
+      throw new RunnersMapException(ErrorCode.NEED_MORE_PW_CONDITION);
     }
     // 동일 닉네임 사용 불가
     if (userRepository.findByNickname(signUpDto.getNickname()).isPresent()) {
@@ -83,11 +88,16 @@ public class UserService {
     String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
     String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
-    // 리프레시 토큰 저장
-    RefreshToken refreshTokenEntity = RefreshToken.builder()
-        .token(refreshToken)
-        .user(user)
-        .build();
+    // 기존 리프레시 토큰이 있으면 업데이트, 없으면 새로 저장
+    RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser(user)
+        .map(existingToken -> {
+          existingToken.setToken(refreshToken);
+          return existingToken;
+        })
+        .orElse(RefreshToken.builder()
+            .token(refreshToken)
+            .user(user)
+            .build());
     refreshTokenRepository.save(refreshTokenEntity);
 
     log.info("로그인 성공");
@@ -202,6 +212,10 @@ public class UserService {
       if (!accountUpdateDto.getNewPassword().equals(accountUpdateDto.getNewConfirmPassword())) {
         throw new RunnersMapException(ErrorCode.NOT_VALID_PASSWORD);
       }
+      // 비밀번호 복잡성 검증
+      if (!isValidPassword(accountUpdateDto.getNewPassword())) {
+        throw new RunnersMapException(ErrorCode.NEED_MORE_PW_CONDITION);
+      }
       user.setPassword(passwordEncoder.encode(accountUpdateDto.getNewPassword()));
     }
 
@@ -273,6 +287,15 @@ public class UserService {
       log.info("프로필 이미지가 삭제되었습니다.");
     }
 
+  }
+
+
+  /**
+   * 비밀번호 검증 최소 1개의 소문자, 숫자, 특수문자 8자 이상
+   */
+  private boolean isValidPassword(String password) {
+    String regex = "^(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*])[a-z\\d!@#$%^&*]{8,}$";
+    return Pattern.compile(regex).matcher(password).matches();
   }
 
 }
