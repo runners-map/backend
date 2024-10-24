@@ -88,11 +88,16 @@ public class UserService {
     String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
     String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
-    // 리프레시 토큰 저장
-    RefreshToken refreshTokenEntity = RefreshToken.builder()
-        .token(refreshToken)
-        .user(user)
-        .build();
+    // 기존 리프레시 토큰이 있으면 업데이트, 없으면 새로 저장
+    RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser(user)
+        .map(existingToken -> {
+          existingToken.setToken(refreshToken);
+          return existingToken;
+        })
+        .orElse(RefreshToken.builder()
+            .token(refreshToken)
+            .user(user)
+            .build());
     refreshTokenRepository.save(refreshTokenEntity);
 
     log.info("로그인 성공");
