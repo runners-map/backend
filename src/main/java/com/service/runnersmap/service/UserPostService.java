@@ -154,7 +154,7 @@ public class UserPostService {
    * 1. post 테이블에 도착완료 업데이트 처리한다.
    * 2. userPost 테이블에 최종 도착 시간, 실제 달린 시간, 최종 달린 거리를 업데이트 처리 한다.
    */
-  public UserPost completeRecord(Long postId, Long userId) throws Exception {
+  public void completeRecord(Long postId, Long userId) throws Exception {
 
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
@@ -189,7 +189,6 @@ public class UserPostService {
         post.setArriveYn(true); // 도착여부
         postRepository.save(post);
       }
-      return userPost;
 
     } else {
       throw new RunnersMapException(ErrorCode.NOT_FOUND_USER_POST_DATA);
