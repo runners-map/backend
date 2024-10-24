@@ -41,6 +41,8 @@ public enum ErrorCode {
 
   NOT_VALID_PASSWORD("비밀번호를 다시 확인해주세요"),
 
+  NEED_MORE_PW_CONDITION("비밀번호는 영소문자, 숫자, 특수문자를 각각 최소 1개씩 포함하여 8자리부터 가능합니다."),
+
   ALREADY_EXISTS_NICKNAME("이미 사용중인 닉네임입니다."),
 
   NOT_FOUND_USER_POST_DATA("모집글에 참가중인 정보를 조회할 수 없습니다."),
@@ -50,6 +52,10 @@ public enum ErrorCode {
   NOT_FOUND_COMMENT("댓글이 존재하지 않습니다."),
 
   WRITER_ONLY_ACCESS_COMMENT_DATA("댓글 작성자만 수정/삭제가 가능합니다."),
+
+  INVALID_COMMENT_CONTENT("공백뿐인 댓글은 작성할 수 없습니다."),
+
+  TOO_LONG_COMMENT("댓글은 200자 이하로만 작성할 수 있습니다."),
 
   // 파일 관련 에러코드
   NOT_FOUND_FILE_DATA("파일을 찾을 수 없습니다."),

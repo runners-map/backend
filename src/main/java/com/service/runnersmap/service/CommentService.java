@@ -49,6 +49,9 @@ public class CommentService {
           return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
         });
 
+    // 댓글 유효성 검사
+    validateComment(commentDto.getContent());
+
     // 댓글 작성
     Comment createdComment = Comment.builder()
         .post(post)
@@ -113,6 +116,9 @@ public class CommentService {
       throw new RunnersMapException(ErrorCode.WRITER_ONLY_ACCESS_COMMENT_DATA);
     }
 
+    // 댓글 유효성 검사
+    validateComment(commentDto.getContent());
+
     comment.setContent(commentDto.getContent());
     comment.setUpdatedAt(LocalDateTime.now());
     comment.setIsEdited(true);
@@ -145,5 +151,17 @@ public class CommentService {
 
     commentRepository.delete(comment);
     log.info("댓글 삭제 완료");
+  }
+
+  /**
+   * 댓글 유효성 검사
+   */
+  private void validateComment(String content) {
+    if (content == null || content.trim().isEmpty()) {
+      throw new RunnersMapException(ErrorCode.INVALID_COMMENT_CONTENT);
+    }
+    if (content.length() > 201) {
+      throw new RunnersMapException(ErrorCode.TOO_LONG_COMMENT);
+    }
   }
 }
