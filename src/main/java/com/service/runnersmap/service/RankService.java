@@ -1,5 +1,6 @@
 package com.service.runnersmap.service;
 
+import com.service.runnersmap.dto.RankDto;
 import com.service.runnersmap.dto.RankSaveDto;
 import com.service.runnersmap.entity.Rank;
 import com.service.runnersmap.entity.User;
@@ -9,9 +10,9 @@ import com.service.runnersmap.repository.RankRepository;
 import com.service.runnersmap.repository.UserPostRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,9 @@ public class RankService {
     rankRepository.deleteByYearAndMonth(year, month);
 
     // 조회년월의 유효한 러너 기록
-    List<UserPost> monthRunRecords = userPostRepository.findAllByValidYnIsTrueAndYearAndMonth(year, month);
+    List<UserPost> monthRunRecords = userPostRepository.findAllByValidYnIsTrueAndYearAndMonthAndActualEndTimeIsNotNull(
+        year,
+        month);
     if (monthRunRecords.isEmpty()) {
       return;
     }
@@ -73,18 +76,16 @@ public class RankService {
               .build();
         })
         .collect(Collectors.groupingBy(RankSaveDto::getUserId,
-            Collectors.summingDouble(RankSaveDto::getScore)))
-        .entrySet().stream()
-        .map(entry -> {
-          Long userId = entry.getKey();
-          double totalScore = entry.getValue();
-
-          // 사용자의 RankSaveDto 생성
-          return RankSaveDto.builder()
-              .userId(userId)
-              .score(totalScore)
-              .build();
-        })
+            Collectors.reducing((dto1, dto2) -> RankSaveDto.builder()
+                .userId(dto1.getUserId())
+                .totalDistance(dto1.getTotalDistance() + dto2.getTotalDistance()) // 거리 합산
+                .runningDuration(
+                    dto1.getRunningDuration().plus(dto2.getRunningDuration())) // 러닝 시간 합산
+                .score(dto1.getScore() + dto2.getScore()) // 점수 합산
+                .build())
+        ))
+        .values().stream()
+        .map(Optional::get)
         .sorted(Comparator.comparingDouble(RankSaveDto::getScore).reversed()) // 점수 기준 내림차순 정렬
         .collect(Collectors.toList());
 
