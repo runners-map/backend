@@ -289,6 +289,24 @@ public class UserService {
 
   }
 
+  /**
+   * 마지막 위치 업데이트
+   */
+  @Transactional
+  public void updateLastPosition(String email, String lastPosition) {
+    log.info("마지막 위치 업데이트 요청");
+
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
+
+    user.setLastPosition(lastPosition);
+    user.setUpdatedAt(LocalDateTime.now());
+    userRepository.save(user);
+
+    log.info("마지막 위치 업데이트 완료");
+
+  }
+
 
   /**
    * 비밀번호 검증 최소 1개의 소문자, 숫자, 특수문자 8자 이상

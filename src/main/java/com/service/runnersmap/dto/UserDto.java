@@ -64,4 +64,13 @@ public class UserDto {
     private String newPassword;
     private String newConfirmPassword;
   }
+
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class LastPositionDto {
+    private String lastPosition;
+  }
 }
