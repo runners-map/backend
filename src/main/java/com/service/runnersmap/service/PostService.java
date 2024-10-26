@@ -97,13 +97,20 @@ public class PostService {
   public AfterRunPictureDto viewAfterRunPictureForPost(Post post) {
     log.info("인증샷 조회 요청 : 모집글Id = {}", post.getPostId());
     Optional<AfterRunPicture> afterRunPicture = afterRunPictureRepository.findByPost(post);
-    if(afterRunPicture.isPresent()) {
+    if (afterRunPicture.isPresent()) {
       AfterRunPicture picture = afterRunPicture.get();
       int likeCount = likesRepository.countByAfterRunPicture(afterRunPicture.get());
+
+      // 좋아요 누른 사용자 리스트 조회
+      List<Long> likeUserIds = likesRepository.findByAfterRunPicture(picture)
+          .stream()
+          .map(likes -> likes.getUser().getId())
+          .toList();
 
       return AfterRunPictureDto.builder()
           .afterRunPictureUrl(picture.getAfterRunPictureUrl())
           .likeCount(likeCount)
+          .likeUserIds(likeUserIds)
           .fileId(picture.getId())
           .build();
     } else {
