@@ -18,6 +18,8 @@ import org.springframework.web.filter.CorsFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
+  @Value("${spring.web.cors.allowed-origin}")
+  private String allowedOrigin;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -46,22 +48,11 @@ public class SecurityConfig {
     return http.build();
   }
 
-  @Bean
-  public CorsFilter corsFilter() {
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration config = new CorsConfiguration();
-    config.setAllowCredentials(true); // 쿠키 및 인증 정보를 허용
-    config.addAllowedOriginPattern("*"); // 모든 도메인을 허용 (cors관련)
-    config.addAllowedHeader("*"); // 모든 헤더를 허용
-    config.addAllowedMethod("*"); // 모든 HTTP 메서드를 허용
-    source.registerCorsConfiguration("/**", config);
-    return new CorsFilter(source);
-  }
 
   private UrlBasedCorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowCredentials(true); // 인증 관련 설정
-    configuration.addAllowedOriginPattern("*"); // 모든 도메인을 허용 (cors관련)
+    configuration.addAllowedOriginPattern(allowedOrigin);
     configuration.addAllowedHeader("*"); // 모든 헤더 허용
     configuration.addAllowedMethod("*"); // 모든 메서드 허용 (GET, POST, PUT, DELETE 등)
 
