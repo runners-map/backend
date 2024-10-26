@@ -4,6 +4,7 @@ import com.service.runnersmap.dto.LoginResponse;
 import com.service.runnersmap.dto.UserDto.AccountDeleteDto;
 import com.service.runnersmap.dto.UserDto.AccountInfoDto;
 import com.service.runnersmap.dto.UserDto.AccountUpdateDto;
+import com.service.runnersmap.dto.UserDto.LastPositionDto;
 import com.service.runnersmap.dto.UserDto.LoginDto;
 import com.service.runnersmap.dto.UserDto.SignUpDto;
 import com.service.runnersmap.service.UserService;
@@ -123,4 +124,15 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+  // 마지막 위치 업데이트 API
+  @PutMapping("/last-position")
+  public ResponseEntity<Void> updateLastPosition(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @RequestBody LastPositionDto lastPositionDto) {
+
+    String email = userDetails.getUsername();
+    userService.updateLastPosition(email, lastPositionDto.getLastPosition());
+    return ResponseEntity.ok().build();
+
+  }
 }
