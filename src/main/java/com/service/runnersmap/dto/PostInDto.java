@@ -17,6 +17,7 @@ public class PostInDto {
   private Long distanceEnd;
   private LocalDate startDate;
   private String startTime;
-  private Integer limitMemberCnt;
+  private Integer limitMemberCntStart;
+  private Integer limitMemberCntEnd;
 
 }

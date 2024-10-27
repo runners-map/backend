@@ -39,6 +39,7 @@ public class UserService {
   /**
    * 회원가입 이메일, 비밀번호, 닉네임, 성별 입력
    */
+  @Transactional
   public void signUp(SignUpDto signUpDto) {
 
     log.info("회원가입 시도: {} ", signUpDto.getEmail());
@@ -74,6 +75,7 @@ public class UserService {
   /**
    * 로그인 이메일, 비밀번호 입력
    */
+  @Transactional
   public LoginResponse login(LoginDto loginDto) {
     log.info("로그인 요청: {} ", loginDto.getEmail())
     ;
@@ -109,6 +111,7 @@ public class UserService {
   /**
    * 리프레시 토큰으로 엑세스 토큰 갱신
    */
+  @Transactional
   public LoginResponse refreshAccessToken(String refreshToken) {
     log.info("리프레시 토큰으로 엑세스 토큰 갱신 요청");
 
@@ -175,6 +178,7 @@ public class UserService {
   /**
    * 회원정보 조회
    */
+  @Transactional(readOnly = true)
   public AccountInfoDto getAccountInfo(String email) {
     log.info("회원정보 조회 요청: {}", email);
     User user = userRepository.findByEmail(email)
@@ -274,6 +278,7 @@ public class UserService {
   /**
    * 프로필 사진 삭제
    */
+  @Transactional
   public void deleteProfileImage(String email) throws IOException {
 
     User user = userRepository.findByEmail(email)

@@ -28,7 +28,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
           "AND (:distanceEnd IS NULL OR p.distance <= :distanceEnd) " +
           "AND (:startDate IS NULL OR (p.start_date_time BETWEEN :startDate AND DATE_ADD(:startDate, INTERVAL 1 DAY))) " +
           "AND (:startTime IS NULL OR TIME_FORMAT(p.start_date_time, '%H%i') = :startTime) " +
-          "AND (:limitMemberCnt IS NULL OR p.limit_member_cnt = :limitMemberCnt)" +
+          "AND (:limitMemberCntStart IS NULL OR p.limit_member_cnt >= :limitMemberCntStart)" +
+          "AND (:limitMemberCntEnd IS NULL OR p.limit_member_cnt <= :limitMemberCntEnd)" +
           "ORDER BY p.start_date_time ASC " +
           "LIMIT 20",
       nativeQuery = true)
@@ -42,7 +43,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
       @Param("distanceEnd") Long distanceEnd,
       @Param("startDate") LocalDate startDate,
       @Param("startTime") String startTime,
-      @Param("limitMemberCnt") Integer limitMemberCnt
+      @Param("limitMemberCntStart") Integer limitMemberCntStart,
+      @Param("limitMemberCntEnd") Integer limitMemberCntEnd
   );
 
 

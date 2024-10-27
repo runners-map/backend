@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class UserPostService {
 
   private final PostRepository postRepository;
@@ -56,6 +55,7 @@ public class UserPostService {
   /*
    * 러닝 참가하기
    */
+  @Transactional
   public void participate(Long postId, Long userId) throws Exception {
 
     User user = userRepository.findById(userId)
@@ -92,6 +92,7 @@ public class UserPostService {
   /*
    * 러닝 나가기
    */
+  @Transactional
   public void participateOut(Long postId, Long userId) throws Exception {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
@@ -118,6 +119,7 @@ public class UserPostService {
    * 1. post 테이블에 출발 업데이트 처리한다. (1명이라도 출발했다면?)
    * 2. userPost 테이블에 실제 출발 시간을 업데이트 처리한다.
    */
+  @Transactional
   public void startRecord(Long postId, Long userId) throws Exception {
 
     Post post = postRepository.findById(postId)
@@ -154,6 +156,7 @@ public class UserPostService {
    * 1. post 테이블에 도착완료 업데이트 처리한다.
    * 2. userPost 테이블에 최종 도착 시간, 실제 달린 시간, 최종 달린 거리를 업데이트 처리 한다.
    */
+  @Transactional
   public void completeRecord(Long postId, Long userId) throws Exception {
 
     Post post = postRepository.findById(postId)
@@ -227,7 +230,7 @@ public class UserPostService {
             up.getPost().getPostId(),
             up.getTotalDistance(),
             DurationToStringConverter.convert(up.getRunningDuration()),
-            up.getActualEndTime().getDayOfMonth(),
+            up.getActualEndTime() != null ? up.getActualEndTime().getDayOfMonth() : null,
             up.getActualStartTime()
         ))
         .sorted(Comparator.comparing(up -> up.getActualStartTime()))
