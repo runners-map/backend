@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class PostService {
 
   private final PostRepository postRepository;
@@ -33,8 +32,6 @@ public class PostService {
   private final UserPostRepository userPostRepository;
 
   private final UserRepository userRepository;
-
-  private final AfterRunService afterRunService;
 
   private final AfterRunPictureRepository afterRunPictureRepository;
 
@@ -53,7 +50,8 @@ public class PostService {
         inDto.getDistanceEnd(),
         inDto.getStartDate(),
         inDto.getStartTime(),
-        inDto.getLimitMemberCnt()
+        inDto.getLimitMemberCntStart(),
+        inDto.getLimitMemberCntEnd()
     );
 
     return posts.stream()
@@ -123,6 +121,7 @@ public class PostService {
     return postRepository.findById(postId);
   }
 
+  @Transactional
   public Post registerPost(PostDto postDto) throws Exception {
 
     // admin(그룹장)이 유효한 사용자인지 확인
@@ -172,6 +171,7 @@ public class PostService {
 
   }
 
+  @Transactional
   public void modifyPost(PostDto postDto) throws Exception {
     Optional<Post> postItem = postRepository.findById(postDto.getPostId());
     if (postItem.isPresent()) {
@@ -199,6 +199,7 @@ public class PostService {
     }
   }
 
+  @Transactional
   public void deletePost(Long postId) throws Exception {
     /*
      * 그룹장 권한의 방삭제 기능 처리시에는 실제 db delete 처리한다.

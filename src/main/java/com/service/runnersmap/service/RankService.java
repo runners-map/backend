@@ -1,6 +1,5 @@
 package com.service.runnersmap.service;
 
-import com.service.runnersmap.dto.RankDto;
 import com.service.runnersmap.dto.RankSaveDto;
 import com.service.runnersmap.entity.Rank;
 import com.service.runnersmap.entity.User;
@@ -10,13 +9,16 @@ import com.service.runnersmap.repository.RankRepository;
 import com.service.runnersmap.repository.UserPostRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,9 +34,11 @@ public class RankService {
    * - 상위 20 등까지만 조회
    * - 추가아이디어 : 본인 등수도 조회
    */
+  @Transactional(readOnly = true)
   public List<Rank> searchRankByMonth(Integer year, Integer month
   ) throws Exception {
-    return rankRepository.findAllByRankPositionBetweenAndYearAndMonthOrderByRankPosition(1, 20, year, month);
+    return rankRepository.findAllByRankPositionBetweenAndYearAndMonthOrderByRankPosition(1, 20,
+        year, month);
   }
 
 
@@ -50,8 +54,15 @@ public class RankService {
    *  21.0975km 이상 : 1.4  (하프마라톤)
    *  42.195km 이상  : 1.5  (마라톤)
    */
-  public void saveRankingByMonth(Integer year, Integer month
-  ) throws Exception {
+//  @Scheduled(cron = "*/10 * * * * *") // 10초에 한번(개발용)
+//  @Scheduled(cron = "0 0 0 * * *") // 매일 자정
+  @Scheduled(cron = "0 0 * * * *") // 정각마다 수행
+  @Transactional
+  public void saveRankingByMonth() throws Exception {
+    LocalDate currentDate = LocalDate.now();
+    Integer year = currentDate.getYear();
+    Integer month = currentDate.getMonthValue();
+
     // 조회년월 랭킹 데이터 삭제 (매일 초기화)
     rankRepository.deleteByYearAndMonth(year, month);
 
@@ -85,7 +96,7 @@ public class RankService {
                 .build())
         ))
         .values().stream()
-        .map(Optional::get)
+        .map(Optional::orElseThrow)
         .sorted(Comparator.comparingDouble(RankSaveDto::getScore).reversed()) // 점수 기준 내림차순 정렬
         .collect(Collectors.toList());
 

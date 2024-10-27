@@ -43,7 +43,8 @@ public class PostController {
       @RequestParam(value = "distanceEnd", required = false) Long distanceEnd,
       @RequestParam(value = "startDate", required = false) LocalDate startDate,
       @RequestParam(value = "startTime", required = false) String startTime,
-      @RequestParam(value = "limitMemberCnt", required = false) Integer limitMemberCnt
+      @RequestParam(value = "limitMemberCntStart", required = false) Integer limitMemberCntStart,
+      @RequestParam(value = "limitMemberCntEnd", required = false) Integer limitMemberCntEnd
   ) throws Exception {
 
     PostInDto inDto = PostInDto.builder()
@@ -56,7 +57,8 @@ public class PostController {
         .distanceEnd(distanceEnd)
         .startDate(startDate)
         .startTime(startTime)
-        .limitMemberCnt(limitMemberCnt)
+        .limitMemberCntStart(limitMemberCntStart)
+        .limitMemberCntEnd(limitMemberCntEnd)
         .build();
 
     List<PostDto> posts = postService.searchPost(inDto);
