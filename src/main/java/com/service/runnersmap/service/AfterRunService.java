@@ -70,6 +70,7 @@ public class AfterRunService {
   /**
    * 인증샷 조회 - 모든 이용자가 조회 가능 좋아요 수도 반환
    */
+  @Transactional(readOnly = true)
   public AfterRunPictureDto viewAfterRunPicture(Long postId) {
     log.info("인증샷 조회 요청 : 모집글Id = {}", postId);
     Post post = postRepository.findById(postId)
