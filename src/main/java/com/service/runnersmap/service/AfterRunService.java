@@ -11,7 +11,6 @@ import com.service.runnersmap.repository.LikesRepository;
 import com.service.runnersmap.repository.PostRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
-import jakarta.persistence.OptimisticLockException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -45,16 +44,9 @@ public class AfterRunService {
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
 
     // 그룹장 권한 체크
-    if (!post.getAdmin().getId().equals(userId)) {
-      log.error("그룹장만 인증샷을 업로드할 수 있습니다.");
-      throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
-    }
-
+    validateAdminAccess(post, userId);
     // 도착 여부 확인
-    if (!post.getArriveYn()) {
-      log.error("러닝이 아직 종료되지 않았습니다.");
-      throw new RunnersMapException(ErrorCode.NOT_FINISHED_RUNNING);
-    }
+    validateArrivedAYn(post);
 
     // S3에 인증샷 업로드 -> url 받아옴
     String afterRunPictureUrl = fileStorageService.uploadFile(file);
@@ -94,6 +86,24 @@ public class AfterRunService {
         .build();
   }
 
+  // 그룹장 권한 체크
+  private void validateAdminAccess(Post post, Long userId) {
+    if (!post.getAdmin().getId().equals(userId)) {
+      log.error("그룹장만 인증샷을 업로드할 수 있습니다.");
+      throw new RunnersMapException(ErrorCode.OWNER_ONLY_ACCESS_POST_DATA);
+    }
+  }
+
+  // 도착 여부 확인
+  private void validateArrivedAYn(Post post) {
+    if (!post.getArriveYn()) {
+      log.error("러닝이 아직 종료되지 않았습니다.");
+      throw new RunnersMapException(ErrorCode.NOT_FINISHED_RUNNING);
+    }
+  }
+
+
+
   /**
    * 인증샷에 좋아요 모든 이용자가 누를 수 있음 토글 형식 (두 번 누를 시 좋아요 취소)
    */
@@ -105,26 +115,21 @@ public class AfterRunService {
     AfterRunPicture afterRunPicture = afterRunPictureRepository.findById(fileId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_FILE_DATA));
 
-    try {
-      // 이미 좋아요 눌렀는지 확인
-      Optional<Likes> alreadyLiked = likesRepository.findByAfterRunPictureAndUser(afterRunPicture, user);
-      // 있으면 취소, 없으면 추가
-      if (alreadyLiked.isPresent()) {
-        likesRepository.delete(alreadyLiked.get());
-        afterRunPicture.setLikeCount(afterRunPicture.getLikeCount() - 1); // 좋아요 수 감소
-      } else {
-        Likes newlikes = Likes.builder()
-            .afterRunPicture(afterRunPicture)
-            .user(user)
-            .build();
-        likesRepository.save(newlikes);
-        afterRunPicture.setLikeCount(afterRunPicture.getLikeCount() + 1); // 좋아요 수 증가
-      }
-      afterRunPictureRepository.save(afterRunPicture);
-    } catch (OptimisticLockException e) {
-      log.error("OptimisticLockException 동시성 문제 발생", e);
-      throw new RunnersMapException(ErrorCode.CONCURRENCY_CONTROL);
+    // 이미 좋아요 눌렀는지 확인
+    Optional<Likes> alreadyLiked = likesRepository.findByAfterRunPictureAndUser(afterRunPicture, user);
+    // 있으면 취소, 없으면 추가
+    if (alreadyLiked.isPresent()) {
+      likesRepository.delete(alreadyLiked.get());
+      afterRunPicture.setLikeCount(afterRunPicture.getLikeCount() - 1); // 좋아요 수 감소
+    } else {
+      Likes newlikes = Likes.builder()
+          .afterRunPicture(afterRunPicture)
+          .user(user)
+          .build();
+      likesRepository.save(newlikes);
+      afterRunPicture.setLikeCount(afterRunPicture.getLikeCount() + 1); // 좋아요 수 증가
     }
+    afterRunPictureRepository.save(afterRunPicture);
   }
 }
 
