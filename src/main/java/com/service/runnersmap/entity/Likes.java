@@ -32,7 +32,4 @@ public class Likes {
   @JoinColumn(name = "users_id")
   private User user;
 
-  @Version
-  private Long version;
-
 }

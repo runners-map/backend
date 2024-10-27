@@ -37,17 +37,9 @@ public class CommentService {
 
     log.info("댓글 작성 요청");
 
-    Post post = postRepository.findById(postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
-
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
-
-    UserPost userPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
-        .orElseThrow(() -> {
-          log.error("사용자가 해당 모집글에 포함되어 있지 않습니다 - 게시글 ID: {}, 사용자 ID: {}", postId, userId);
-          return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
-        });
+    Post post = validatePost(postId);
+    User user = validateUser(userId);
+    validateUserPost(userId, postId);
 
     // 댓글 유효성 검사
     validateComment(commentDto.getContent());
@@ -80,14 +72,9 @@ public class CommentService {
   public Page<CommentDto> getComments(Long postId, Long userId, Pageable pageable) {
     log.info("댓글 조회 요청 - 게시글 ID: {}", postId);
 
-    Post post = postRepository.findById(postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
-
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
-
-    UserPost userPost = userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
-        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER));
+    Post post = validatePost(postId);
+    validateUser(userId);
+    validateUserPost(userId, postId);
 
     return commentRepository.findByPost(post, pageable)
         .map(comment -> new CommentDto(
@@ -163,5 +150,24 @@ public class CommentService {
     if (content.length() > 201) {
       throw new RunnersMapException(ErrorCode.TOO_LONG_COMMENT);
     }
+  }
+
+  private Post validatePost(Long postId) {
+    return postRepository.findById(postId)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
+  }
+
+  private User validateUser(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
+  }
+
+  private void validateUserPost(Long userId, Long postId) {
+    userPostRepository.findByUser_IdAndPost_PostIdAndValidYnIsTrue(userId, postId)
+        .orElseThrow(() -> {
+          log.error("사용자가 해당 모집글에 포함되어 있지 않습니다 - 게시글 ID: {}, 사용자 ID: {}", postId, userId);
+          return new RunnersMapException(ErrorCode.NOT_POST_INCLUDE_USER);
+
+        });
   }
 }
