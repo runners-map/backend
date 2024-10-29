@@ -54,14 +54,11 @@ public class RankService {
    *  21.0975km 이상 : 1.4  (하프마라톤)
    *  42.195km 이상  : 1.5  (마라톤)
    */
-//  @Scheduled(cron = "*/10 * * * * *") // 10초에 한번(개발용)
-//  @Scheduled(cron = "0 0 0 * * *") // 매일 자정
-  @Scheduled(cron = "0 0 * * * *") // 정각마다 수행
   @Transactional
-  public void saveRankingByMonth() throws Exception {
-    LocalDate currentDate = LocalDate.now();
-    Integer year = currentDate.getYear();
-    Integer month = currentDate.getMonthValue();
+  public void saveRankingByMonth(Integer year, Integer month) throws Exception {
+//    LocalDate currentDate = LocalDate.now();
+//    Integer year = currentDate.getYear();
+//    Integer month = currentDate.getMonthValue();
 
     // 조회년월 랭킹 데이터 삭제 (매일 초기화)
     rankRepository.deleteByYearAndMonth(year, month);
