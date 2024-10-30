@@ -316,7 +316,7 @@ public class UserService {
   /**
    * 비밀번호 검증 최소 1개의 소문자, 숫자, 특수문자 8자 이상
    */
-  private boolean isValidPassword(String password) {
+  public boolean isValidPassword(String password) {
     String regex = "^(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*])[a-z\\d!@#$%^&*]{8,}$";
     return Pattern.compile(regex).matcher(password).matches();
   }
