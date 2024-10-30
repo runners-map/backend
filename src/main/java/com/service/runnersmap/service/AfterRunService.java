@@ -11,6 +11,7 @@ import com.service.runnersmap.repository.LikesRepository;
 import com.service.runnersmap.repository.PostRepository;
 import com.service.runnersmap.repository.UserRepository;
 import com.service.runnersmap.type.ErrorCode;
+import jakarta.persistence.OptimisticLockException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -57,6 +58,7 @@ public class AfterRunService {
         .post(post)
         .afterRunPictureUrl(afterRunPictureUrl)
         .createdAt(LocalDateTime.now())
+        .likeCount(0)
         .build();
 
     AfterRunPicture savedAfterRunPicture = afterRunPictureRepository.save(afterRunPicture);
@@ -110,6 +112,7 @@ public class AfterRunService {
    */
   @Transactional
   public void toggleLike(Long fileId, Long userId) {
+    try {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_USER));
 
@@ -131,6 +134,11 @@ public class AfterRunService {
       afterRunPicture.setLikeCount(afterRunPicture.getLikeCount() + 1); // 좋아요 수 증가
     }
     afterRunPictureRepository.save(afterRunPicture);
+
+  } catch (OptimisticLockException e) {
+    log.error("동시성 문제 발생");
+    throw new RunnersMapException(ErrorCode.CONCURRENCY_CONTROL);
+    }
   }
 }
 

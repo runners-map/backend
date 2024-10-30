@@ -40,4 +40,7 @@ public class AfterRunPicture {
 
   private Integer likeCount = 0;  // 좋아요 수, 기본값 0
 
+  @Version
+  private Long version;
+
 }
