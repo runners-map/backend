@@ -32,7 +32,7 @@ public interface UserPostRepository extends JpaRepository<UserPost, Long> {
 
   List<UserPost> findAllByUserIdAndYearAndMonth(Long userId, int year, int month);
 
-  List<UserPost> findAllByUser_IdAndValidYnIsTrueAndYearAndMonth(Long userId, int year, int month);
+  List<UserPost> findAllByUser_IdAndValidYnIsTrueAndYearAndMonthAndActualEndTimeIsNotNull(Long userId, int year, int month);
 
   List<UserPost> findAllByValidYnIsTrueAndYearAndMonthAndActualEndTimeIsNotNull(int year, int month);
 

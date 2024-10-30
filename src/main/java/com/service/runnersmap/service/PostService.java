@@ -3,6 +3,7 @@ package com.service.runnersmap.service;
 import com.service.runnersmap.dto.AfterRunPictureDto;
 import com.service.runnersmap.dto.PostDto;
 import com.service.runnersmap.dto.PostInDto;
+import com.service.runnersmap.dto.PostUserDto;
 import com.service.runnersmap.entity.AfterRunPicture;
 import com.service.runnersmap.entity.Post;
 import com.service.runnersmap.entity.User;
@@ -117,8 +118,25 @@ public class PostService {
   }
 
   @Transactional(readOnly = true)
-  public Optional<Post> searchDetailPost(Long postId) throws Exception {
-    return postRepository.findById(postId);
+  public PostDto searchDetailPost(Long postId) throws Exception {
+    Post post = postRepository.findById(postId)
+        .orElseThrow(() -> new RunnersMapException(ErrorCode.NOT_FOUND_POST_DATA));
+
+    List<UserPost> userPosts = userPostRepository.findAllByPost_PostIdAndValidYnIsTrue(postId);
+    PostDto postDto = PostDto.fromEntity(post);
+
+    List<PostUserDto> postUserDtoList = userPosts.stream()
+        .map(userPost -> {
+          PostUserDto postUserDto = new PostUserDto();
+          postUserDto.setUserId(userPost.getUser().getId());
+          postUserDto.setNickname(userPost.getUser().getNickname());
+          postUserDto.setProfileImageUrl(userPost.getUser().getProfileImageUrl());
+          return postUserDto;
+        })
+        .collect(Collectors.toList());
+
+    postDto.setPostUsers(postUserDtoList);
+    return postDto;
   }
 
   @Transactional

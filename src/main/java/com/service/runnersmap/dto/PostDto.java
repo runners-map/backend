@@ -3,6 +3,7 @@ package com.service.runnersmap.dto;
 import com.service.runnersmap.converter.PathListConverter;
 import com.service.runnersmap.entity.Path;
 import com.service.runnersmap.entity.Post;
+import com.service.runnersmap.entity.UserPost;
 import jakarta.persistence.Convert;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -57,6 +60,8 @@ public class PostDto {
   private String afterRunPictureUrl;  // 인증샷
 
   private int likeCount;  // 좋아요 수
+
+  private List<PostUserDto> postUsers;
 
   public static PostDto fromEntity(Post post) {
 
