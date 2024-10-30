@@ -77,14 +77,8 @@ public class PostController {
   public ResponseEntity<PostDto> searchDetailPost(
       @RequestParam(value = "postId") Long postId
   ) throws Exception {
-    Optional<Post> post = postService.searchDetailPost(postId);
-    if (post.isPresent()) {
-      PostDto postDto = PostDto.fromEntity(post.get());
-      return ResponseEntity.ok(postDto);
-    } else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(null);
-    }
+    PostDto postDto = postService.searchDetailPost(postId);
+    return ResponseEntity.ok(postDto);
   }
 
   /*

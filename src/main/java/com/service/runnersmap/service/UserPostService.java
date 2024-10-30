@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -222,19 +223,32 @@ public class UserPostService {
     }
     result.add(new UserPostSearchDto("MONTH", sumMonthTotaldistance));
 
-    List<UserPostDto> runningMonths = userPostRepository.findAllByUser_IdAndValidYnIsTrueAndYearAndMonth(
-            userId, year, month)
+    List<UserPostDto> runningMonths = userPostRepository.findAllByUser_IdAndValidYnIsTrueAndYearAndMonthAndActualEndTimeIsNotNull(userId, year, month)
         .stream()
-        .map(up -> new UserPostDto(
-            up.getUser().getId(),
-            up.getPost().getPostId(),
-            up.getTotalDistance(),
-            DurationToStringConverter.convert(up.getRunningDuration()),
-            up.getActualEndTime() != null ? up.getActualEndTime().getDayOfMonth() : null,
-            up.getActualStartTime()
+        .collect(Collectors.groupingBy(
+            up -> Map.entry(up.getUser().getId(), up.getActualEndTime().toLocalDate()), // 사용자별 일자 기준 groupBy
+            Collectors.collectingAndThen(
+                Collectors.toList(),
+                group -> {
+                  double totalDistanceSum = group.stream()
+                      .mapToDouble(UserPost::getTotalDistance)
+                      .sum();
+
+                  long totalRunningDuration = group.stream()
+                      .mapToLong(up -> up.getRunningDuration().getSeconds())
+                      .sum();
+
+                  return UserPostDto.builder()
+                                  .distance(totalDistanceSum)
+                                  .runningTime(DurationToStringConverter.convert(Duration.ofSeconds(totalRunningDuration)))
+                                  .day(group.get(0).getActualEndTime().getDayOfMonth())
+                                  .build();
+                }
+            )
         ))
-        .sorted(Comparator.comparing(up -> up.getActualStartTime()))
+        .values().stream()
         .collect(Collectors.toList());
+
 
     result.add(new UserPostSearchDto("DAY", runningMonths));
 
